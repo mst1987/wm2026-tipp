@@ -1,0 +1,89 @@
+<div class="dashboard">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="trophy">🏆</div>
+    <h1>WM 2026 Tippspiel</h1>
+    <p>Tippe die Ergebnisse der WM 2026 und messe dich mit deinen Freunden!</p>
+
+    <div class="hero-actions" *ngIf="!auth.isLoggedIn && !auth.isLoading()">
+      <button class="btn-discord" (click)="auth.loginWithDiscord()">
+        <svg width="18" height="18" viewBox="0 0 127.14 96.36" fill="currentColor">
+          <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+        </svg>
+        Jetzt mit Discord anmelden
+      </button>
+    </div>
+
+    <p class="welcome" *ngIf="auth.currentUser() as user">
+      Willkommen zurück, <strong>{{ user.username }}</strong>! 👋
+    </p>
+  </section>
+
+  <!-- Quick Links -->
+  <div class="quick-links">
+    <a routerLink="/matches" class="quick-link">
+      <span class="ql-icon">⚽</span>
+      <span class="ql-text">
+        <strong>Spiele & Tipps</strong>
+        <small>Jetzt tippen</small>
+      </span>
+    </a>
+    <a routerLink="/groups" class="quick-link">
+      <span class="ql-icon">🗂️</span>
+      <span class="ql-text">
+        <strong>Gruppen</strong>
+        <small>Tabellen & Spieltage</small>
+      </span>
+    </a>
+    <a routerLink="/standings" class="quick-link">
+      <span class="ql-icon">📊</span>
+      <span class="ql-text">
+        <strong>Rangliste</strong>
+        <small>Wer führt?</small>
+      </span>
+    </a>
+  </div>
+
+  <div class="grid" *ngIf="!loading()">
+
+    <!-- Top 5 -->
+    <section class="card">
+      <h3 class="card-title">🏆 Top 5</h3>
+      <div class="top5-empty" *ngIf="top5().length === 0">
+        Noch keine Tipps abgegeben.
+      </div>
+      <div class="top5-list">
+        <div *ngFor="let s of top5()" class="top5-row" [class.gold]="s.rank === 1" [class.me]="auth.currentUser()?.id === s.id">
+          <span class="medal">{{ rankMedal(s.rank) }}</span>
+          <img [src]="avatarUrl(s)" [alt]="s.username" class="avatar" />
+          <span class="name">
+            {{ s.username }}
+            <span class="you" *ngIf="auth.currentUser()?.id === s.id">(Du)</span>
+          </span>
+          <span class="pts">{{ s.totalPoints }} Pkt</span>
+        </div>
+      </div>
+      <a routerLink="/standings" class="card-link">Vollständige Rangliste →</a>
+    </section>
+
+    <!-- Nächste Spiele -->
+    <section class="card">
+      <h3 class="card-title">📅 Nächste Spiele</h3>
+      <div class="upcoming-empty" *ngIf="upcoming().length === 0">
+        Keine anstehenden Spiele.
+      </div>
+      <div class="upcoming-list">
+        <div *ngFor="let m of upcoming()" class="upcoming-row" [attr.data-group]="normalizeGroup(m.group)">
+          <span class="up-date">{{ formatDate(m.matchDate) }}</span>
+          <span class="up-match">{{ m.teamHome }} – {{ m.teamAway }}</span>
+          <span class="up-group" *ngIf="m.group">Gr. {{ normalizeGroup(m.group) }}</span>
+        </div>
+      </div>
+      <a routerLink="/matches" class="card-link">Alle Spiele →</a>
+    </section>
+
+  </div>
+
+  <div class="loading" *ngIf="loading()">Lade Daten...</div>
+</div>

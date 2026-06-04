@@ -1,0 +1,61 @@
+<div class="player-tips-page">
+
+  <a routerLink="/standings" class="back-link">← Zurück zur Rangliste</a>
+
+  <div class="loading" *ngIf="loading()">Lade Tipps...</div>
+
+  <ng-container *ngIf="!loading() && user() as u">
+    <div class="player-header">
+      <img [src]="avatarUrl(u)" [alt]="u.username" class="avatar" />
+      <div>
+        <h2>{{ u.username }}</h2>
+        <p class="subtitle">{{ tips().length }} Tipps · {{ totalPoints() }} Punkte</p>
+      </div>
+    </div>
+
+    <div class="tips-empty" *ngIf="tips().length === 0">
+      Dieser Spieler hat noch keine Tipps abgegeben.
+    </div>
+
+    <div class="tips-list">
+      <div
+        *ngFor="let tip of tips()"
+        class="tip-row"
+        [class]="tipClass(tip)"
+        [attr.data-group]="normalizeGroup(tip.match.group)"
+      >
+        <div class="tip-match-info">
+          <span class="tip-date">{{ formatDate(tip.match.matchDate) }}</span>
+          <span class="tip-group" *ngIf="tip.match.group">Gr. {{ normalizeGroup(tip.match.group) }}</span>
+        </div>
+
+        <div class="tip-teams">
+          <span class="team-name">{{ tip.match.teamHome }}</span>
+          <div class="tip-scores">
+            <span class="predicted">{{ tip.predictedHome }} : {{ tip.predictedAway }}</span>
+            <span class="divider">|</span>
+            <span class="result" *ngIf="tip.match.status === 'FINISHED'">
+              {{ resultLabel(tip) }}
+            </span>
+            <span class="status-badge" *ngIf="tip.match.status !== 'FINISHED'"
+              [class]="tip.match.status.toLowerCase()">
+              {{ tip.match.status === 'LIVE' ? 'LIVE' : '–' }}
+            </span>
+          </div>
+          <span class="team-name right">{{ tip.match.teamAway }}</span>
+        </div>
+
+        <div class="tip-points" *ngIf="tip.pointsAwarded">
+          <span class="pts" [class]="tipClass(tip)">{{ tip.points }} Pkt</span>
+          <span class="pts-label" *ngIf="tip.points === 3">Exakt ✓</span>
+          <span class="pts-label" *ngIf="tip.points === 1">Tendenz ✓</span>
+          <span class="pts-label" *ngIf="tip.points === 0">Falsch</span>
+        </div>
+        <div class="tip-points pending" *ngIf="!tip.pointsAwarded">
+          <span>Ausstehend</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+</div>

@@ -1,0 +1,36 @@
+<div class="app-layout">
+  <nav class="navbar">
+    <a routerLink="/" class="brand">
+      <span class="brand-icon">🏆</span>
+      <span class="brand-text">WM 2026</span>
+    </a>
+
+    <div class="nav-links" [class.open]="menuOpen">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="menuOpen = false">Dashboard</a>
+      <a routerLink="/matches" routerLinkActive="active" (click)="menuOpen = false">Spiele</a>
+      <a routerLink="/groups" routerLinkActive="active" (click)="menuOpen = false">Gruppen</a>
+      <a routerLink="/knockout" routerLinkActive="active" (click)="menuOpen = false">K.O.-Runden</a>
+      <a routerLink="/standings" routerLinkActive="active" (click)="menuOpen = false">Rangliste</a>
+    </div>
+
+    <div class="nav-right">
+      <ng-container *ngIf="auth.currentUser() as user">
+        <img [src]="auth.avatarUrl(user)" [alt]="user.username" class="user-avatar" />
+        <span class="user-name">{{ user.username }}</span>
+        <button class="btn-logout" (click)="auth.logout()" title="Abmelden">↪</button>
+      </ng-container>
+
+      <a routerLink="/login" class="btn-login" *ngIf="!auth.currentUser() && !auth.isLoading()">
+        Anmelden
+      </a>
+    </div>
+
+    <button class="hamburger" (click)="menuOpen = !menuOpen">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

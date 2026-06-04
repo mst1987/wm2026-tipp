@@ -1,0 +1,57 @@
+<div class="knockout-page">
+
+  <div class="page-header">
+    <h2>K.O.-Runden</h2>
+  </div>
+
+  <div class="loading" *ngIf="loading()">Lade K.O.-Runden...</div>
+
+  <div class="stages" *ngIf="!loading()">
+    <section *ngFor="let stage of stages()" class="stage-section">
+
+      <div class="stage-header">
+        <span class="stage-icon">{{ stageIcon(stage.stage) }}</span>
+        <h3>{{ stage.label }}</h3>
+        <span class="match-count">{{ stage.matches.length }} Spiel{{ stage.matches.length !== 1 ? 'e' : '' }}</span>
+      </div>
+
+      <div class="matches-grid">
+        <div
+          *ngFor="let m of stage.matches"
+          class="match-card"
+          [class]="matchClass(m)"
+        >
+          <div class="match-date">{{ formatDate(m.matchDate) }}</div>
+
+          <div class="match-teams">
+            <!-- Heimteam -->
+            <div class="team" [class.winner]="winnerHome(m)" [class.tbd]="isTbd(m.teamHome)">
+              <img *ngIf="m.teamHomeLogo && !isTbd(m.teamHome)" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="crest" />
+              <span class="team-name">{{ isTbd(m.teamHome) ? 'ausstehend' : m.teamHome }}</span>
+            </div>
+
+            <!-- Ergebnis / Trennzeichen -->
+            <div class="result">
+              <ng-container *ngIf="m.status === 'FINISHED' || m.status === 'LIVE'">
+                <span class="score" [class.live-score]="m.status === 'LIVE'">
+                  {{ m.scoreHome }} : {{ m.scoreAway }}
+                </span>
+                <span class="status-tag" [class]="m.status.toLowerCase()">
+                  {{ m.status === 'LIVE' ? 'LIVE' : 'FT' }}
+                </span>
+              </ng-container>
+              <span class="vs" *ngIf="m.status === 'SCHEDULED'">vs</span>
+            </div>
+
+            <!-- Auswärtsteam -->
+            <div class="team away" [class.winner]="winnerAway(m)" [class.tbd]="isTbd(m.teamAway)">
+              <span class="team-name">{{ isTbd(m.teamAway) ? 'ausstehend' : m.teamAway }}</span>
+              <img *ngIf="m.teamAwayLogo && !isTbd(m.teamAway)" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="crest" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div>

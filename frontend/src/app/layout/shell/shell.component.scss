@@ -1,0 +1,143 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
+  height: 56px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #f0c040;
+
+  .brand-icon { font-size: 1.3rem; }
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.25rem;
+
+  a {
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.5rem;
+    color: #8b949e;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: color 0.15s, background 0.15s;
+
+    &:hover { color: #c9d1d9; background: #21262d; }
+    &.active { color: #c9d1d9; background: #21262d; }
+  }
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.btn-login {
+  padding: 0.35rem 0.9rem;
+  background: #5865f2;
+  color: #fff;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.15s;
+
+  &:hover { background: #4752c4; }
+}
+
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #c9d1d9;
+}
+
+.btn-logout {
+  background: none;
+  border: 1px solid #30363d;
+  border-radius: 0.4rem;
+  color: #8b949e;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: #f85149; border-color: #f85149; }
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 4px;
+
+  span {
+    display: block;
+    height: 2px;
+    background: #c9d1d9;
+    border-radius: 1px;
+    transition: transform 0.2s;
+  }
+}
+
+.main-content {
+  flex: 1;
+  background: #0d1117;
+  color: #c9d1d9;
+}
+
+@media (max-width: 600px) {
+  .hamburger { display: flex; }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.25rem;
+
+    &.open { display: flex; }
+  }
+
+  .nav-user .user-name { display: none; }
+}

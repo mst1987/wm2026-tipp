@@ -1,0 +1,97 @@
+.standings-page {
+  padding: 1.5rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+  h2 { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 700; }
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #8b949e;
+}
+
+.loading { text-align: center; color: #8b949e; padding: 3rem; }
+
+.standings-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #58a6ff;
+    background: rgba(88, 166, 255, 0.05);
+
+    .arrow { opacity: 1; }
+  }
+
+  &.me {
+    border-color: #f0c040;
+    background: rgba(240, 192, 64, 0.06);
+  }
+
+  &.top .rank { font-size: 1.3rem; }
+}
+
+.rank {
+  min-width: 2.5rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #8b949e;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.username {
+  flex: 1;
+  font-weight: 600;
+  font-size: 1rem;
+
+  .you {
+    font-size: 0.78rem;
+    color: #f0c040;
+    font-weight: 400;
+    margin-left: 0.3rem;
+  }
+}
+
+.stats { font-size: 0.82rem; color: #8b949e; }
+
+.points {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #f0c040;
+  min-width: 60px;
+  text-align: right;
+}
+
+.arrow {
+  font-size: 1.2rem;
+  color: #8b949e;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.empty { text-align: center; color: #8b949e; padding: 3rem; }

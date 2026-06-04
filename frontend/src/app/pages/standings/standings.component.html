@@ -1,0 +1,33 @@
+<div class="standings-page">
+  <div class="page-header">
+    <h2>Rangliste</h2>
+    <p class="hint">Klicke auf einen Spieler um seine Tipps zu sehen.</p>
+  </div>
+
+  <div class="loading" *ngIf="loading()">Lade Rangliste...</div>
+
+  <div class="standings-table" *ngIf="!loading()">
+    <div
+      *ngFor="let entry of standings()"
+      class="row"
+      [class.me]="auth.currentUser()?.id === entry.id"
+      [class.top]="entry.rank <= 3"
+      (click)="openPlayer(entry)"
+      title="Tipps von {{ entry.username }} anzeigen"
+    >
+      <span class="rank">{{ rankMedal(entry.rank) }}</span>
+      <img [src]="avatarUrl(entry)" [alt]="entry.username" class="avatar" />
+      <span class="username">
+        {{ entry.username }}
+        <span class="you" *ngIf="auth.currentUser()?.id === entry.id">(Du)</span>
+      </span>
+      <span class="stats">{{ entry.awardedTips }}/{{ entry.tipsCount }} Tipps</span>
+      <span class="points">{{ entry.totalPoints }} Pkt</span>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="empty" *ngIf="standings().length === 0">
+      Noch keine Tipps abgegeben.
+    </div>
+  </div>
+</div>

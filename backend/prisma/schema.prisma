@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  discordId     String   @unique @map("discord_id")
+  username      String
+  discriminator String?
+  avatar        String?
+  email         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  tips          Tip[]
+
+  @@map("users")
+}
+
+model Match {
+  id           String      @id @default(cuid())
+  externalId   Int?        @unique @map("external_id")
+  matchDate    DateTime    @map("match_date")
+  teamHome     String      @map("team_home")
+  teamAway     String      @map("team_away")
+  teamHomeLogo String?     @map("team_home_logo")
+  teamAwayLogo String?     @map("team_away_logo")
+  scoreHome    Int?        @map("score_home")
+  scoreAway    Int?        @map("score_away")
+  status       MatchStatus @default(SCHEDULED)
+  stage        String
+  group        String?
+
+  tips         Tip[]
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("matches")
+}
+
+model Tip {
+  id            String  @id @default(cuid())
+  userId        String  @map("user_id")
+  matchId       String  @map("match_id")
+  predictedHome Int     @map("predicted_home")
+  predictedAway Int     @map("predicted_away")
+  points        Int     @default(0)
+  pointsAwarded Boolean @default(false) @map("points_awarded")
+
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match         Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, matchId])
+  @@map("tips")
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  POSTPONED
+  CANCELLED
+}

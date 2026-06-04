@@ -1,0 +1,142 @@
+<div class="groups-page">
+
+  <div class="page-header">
+    <h2>Gruppen</h2>
+    <p class="hint">🟢 Qualifiziert (Top 2) &nbsp; 🟡 Mögl. als Dritter</p>
+  </div>
+
+  <div class="loading" *ngIf="loading()">Lade Gruppenphase...</div>
+
+  <ng-container *ngIf="!loading()">
+    <!-- Gruppen-Tabs -->
+    <div class="group-tabs">
+      <button
+        *ngFor="let g of groupKeys()"
+        class="tab"
+        [class.active]="activeGroup() === g"
+        [class.has-live]="hasLiveMatches(groups()[g])"
+        [style.--gc]="groupColor(g)"
+        (click)="activeGroup.set(g)"
+      >
+        Gruppe {{ g }}
+        <span class="live-dot" *ngIf="hasLiveMatches(groups()[g])"></span>
+      </button>
+    </div>
+
+    <ng-container *ngIf="activeData as data">
+      <div class="group-layout">
+
+        <!-- Tabelle -->
+        <section class="card table-card">
+          <div class="card-title-row">
+            <h3 class="card-title" [style.border-left-color]="groupColor(activeGroup())">
+              Gruppe {{ activeGroup() }}
+            </h3>
+            <span class="live-badge" *ngIf="hasLiveMatches(data)">
+              <span class="live-dot-inline"></span> Live
+            </span>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th class="pos">#</th>
+                  <th class="team-col">Team</th>
+                  <th title="Spiele">Sp</th>
+                  <th title="Gewonnen">S</th>
+                  <th title="Unentschieden">U</th>
+                  <th title="Verloren">N</th>
+                  <th title="Tore" class="goals-col">Tore</th>
+                  <th title="Tordifferenz" class="td-col">TD</th>
+                  <th title="Punkte" class="pts-col">Pkt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let row of data.table; let i = index"
+                  [class]="rankIndicator(row, data.table)"
+                  [class.live-row]="liveTeams(data).has(row.team)"
+                >
+                  <td class="pos">{{ i + 1 }}</td>
+                  <td class="team-col">
+                    <img *ngIf="row.logo" [src]="row.logo" [alt]="row.team" class="team-crest" />
+                    <span class="team-crest-placeholder" *ngIf="!row.logo">⚽</span><span>{{ row.team }}</span><span class="team-live-dot" *ngIf="liveTeams(data).has(row.team)" title="Spielt gerade"></span>
+                  </td>
+                  <td>{{ row.played }}</td>
+                  <td>{{ row.won }}</td>
+                  <td>{{ row.drawn }}</td>
+                  <td>{{ row.lost }}</td>
+                  <td class="goals-col">{{ row.goalsFor }}:{{ row.goalsAgainst }}</td>
+                  <td class="td-col" [class.positive]="row.goalDiff > 0" [class.negative]="row.goalDiff < 0">
+                    {{ row.goalDiff > 0 ? '+' : '' }}{{ row.goalDiff }}
+                  </td>
+                  <td class="pts-col"><strong>{{ row.points }}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="legend">
+            <span class="legend-item"><span class="dot qualify"></span> Top 2 — direktes Weiterkommen</span>
+            <span class="legend-item"><span class="dot thirdplace"></span> Platz 3 — mögliches Weiterkommen</span>
+          </div>
+
+          <div class="third-place-rule">
+            <strong>Regelung Gruppendritte:</strong>
+            Aus allen 12 Gruppendritten qualifizieren sich die <strong>besten 8</strong> für das Sechzehntelfinale.
+            Die Auswahl erfolgt nach Punkten, dann Tordifferenz, dann Toren, dann FIFA-Weltrangliste.
+          </div>
+        </section>
+
+        <!-- Spieltage -->
+        <section class="card matchdays-card">
+          <h3 class="card-title" [style.border-left-color]="groupColor(activeGroup())">
+            Spieltage
+          </h3>
+
+          <div *ngFor="let day of data.matchdays" class="matchday">
+            <div class="matchday-header">{{ day.number }}. Spieltag</div>
+
+            <div
+              *ngFor="let m of day.matches"
+              class="matchday-row"
+              [class.live]="m.status === 'LIVE'"
+              [class.finished]="m.status === 'FINISHED'"
+            >
+              <span class="md-time">{{ formatDate(m.matchDate) }}</span>
+
+              <div class="md-match">
+                <span class="md-team home">
+                  <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="flag" />
+                  {{ m.teamHome }}
+                </span>
+
+                <div class="md-result">
+                  <ng-container *ngIf="m.status === 'FINISHED' || m.status === 'LIVE'">
+                    <span class="score" [class.live-score]="m.status === 'LIVE'">
+                      {{ m.scoreHome }} : {{ m.scoreAway }}
+                    </span>
+                  </ng-container>
+                  <ng-container *ngIf="m.status === 'SCHEDULED'">
+                    <span class="vs">vs</span>
+                  </ng-container>
+                  <span class="status-tag" [class]="m.status.toLowerCase()" *ngIf="m.status !== 'SCHEDULED'">
+                    {{ statusLabel(m.status) }}
+                  </span>
+                </div>
+
+                <span class="md-team away">
+                  {{ m.teamAway }}
+                  <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="flag" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </ng-container>
+  </ng-container>
+
+</div>

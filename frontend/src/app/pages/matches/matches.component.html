@@ -1,0 +1,124 @@
+<div class="matches-page">
+  <div class="page-header">
+    <h2>Spiele</h2>
+    <div class="group-tabs" *ngIf="!loading()">
+      <button
+        *ngFor="let g of groups"
+        class="tab"
+        [class.active]="activeGroup() === g"
+        [style.--group-color]="g === 'all' ? null : groupColor(g)"
+        (click)="activeGroup.set(g)"
+      >
+        {{ groupLabel(g) }}
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading()">Lade Spiele...</div>
+
+  <div class="matches-grid" *ngIf="!loading()">
+    <div
+      *ngFor="let match of filteredMatches"
+      class="match-card"
+      [class.live]="match.status === 'LIVE'"
+      [class.finished]="match.status === 'FINISHED'"
+      [style.--group-color]="groupColor(match.group)"
+    >
+      <div class="match-meta">
+        <span class="date">{{ formatDate(match.matchDate) }}</span>
+        <div class="meta-right">
+          <span class="group-badge" *ngIf="match.group" [style.background]="groupColor(match.group)">
+            Gr. {{ match.group }}
+          </span>
+          <span class="badge" [class]="match.status.toLowerCase()">{{ statusLabel(match.status) }}</span>
+        </div>
+      </div>
+
+      <div class="teams">
+        <div class="team">
+          <img *ngIf="match.teamHomeLogo" [src]="match.teamHomeLogo" [alt]="match.teamHome" class="team-logo" />
+          <span class="team-flag" *ngIf="!match.teamHomeLogo">🏳</span>
+          <span class="team-name">{{ match.teamHome }}</span>
+        </div>
+        <div class="score-area">
+          <span class="score" *ngIf="match.status === 'FINISHED' || match.status === 'LIVE'">
+            {{ match.scoreHome }} – {{ match.scoreAway }}
+          </span>
+          <span class="vs" *ngIf="match.status === 'SCHEDULED'">vs</span>
+        </div>
+        <div class="team right">
+          <span class="team-name">{{ match.teamAway }}</span>
+          <img *ngIf="match.teamAwayLogo" [src]="match.teamAwayLogo" [alt]="match.teamAway" class="team-logo" />
+          <span class="team-flag" *ngIf="!match.teamAwayLogo">🏳</span>
+        </div>
+      </div>
+
+      <!-- Tipp-Bereich: eingeloggt + Deadline noch offen -->
+      <div class="tip-section" *ngIf="canTip(match)">
+        <p class="tip-hint">⏱ Tipp möglich bis 10 Minuten vor Spielstart</p>
+        <div class="tip-inputs">
+          <input
+            type="number" min="0" max="20" placeholder="0"
+            [value]="getForm(match.id).home"
+            (input)="updateForm(match.id, 'home', +$any($event.target).value)"
+          />
+          <span class="colon">:</span>
+          <input
+            type="number" min="0" max="20" placeholder="0"
+            [value]="getForm(match.id).away"
+            (input)="updateForm(match.id, 'away', +$any($event.target).value)"
+          />
+          <button
+            class="btn-save"
+            (click)="saveTip(match)"
+            [disabled]="getForm(match.id).saving || getForm(match.id).home === null || getForm(match.id).away === null"
+          >
+            <ng-container *ngIf="getForm(match.id).saving">...</ng-container>
+            <ng-container *ngIf="!getForm(match.id).saving && getForm(match.id).saved">✓ Gespeichert</ng-container>
+            <ng-container *ngIf="!getForm(match.id).saving && !getForm(match.id).saved">Tippen</ng-container>
+          </button>
+        </div>
+        <p class="tip-error" *ngIf="getForm(match.id).error">{{ getForm(match.id).error }}</p>
+      </div>
+
+      <!-- Deadline abgelaufen, aber noch nicht gestartet -->
+      <div class="tip-section closed" *ngIf="isDeadlinePassed(match)">
+        <p class="tip-closed">🔒 Tipp-Deadline abgelaufen (10 Min. vor Spielstart)</p>
+      </div>
+
+      <!-- Nicht eingeloggt, Spiel noch offen -->
+      <div class="tip-section guest" *ngIf="!auth.isLoggedIn && match.status === 'SCHEDULED'">
+        <p class="tip-guest">
+          <a routerLink="/login">Anmelden</a>, um einen Tipp abzugeben
+        </p>
+      </div>
+
+      <!-- Eigener Tipp + Punkte -->
+      <div class="my-tip"
+           *ngIf="tips().get(match.id) as tip"
+           [class.has-result]="match.status === 'FINISHED' || match.status === 'LIVE'">
+        <span class="tip-label">Mein Tipp:</span>
+        <span class="tip-result">{{ tip.predictedHome }} : {{ tip.predictedAway }}</span>
+
+        <!-- Beendet: endgültige Punkte -->
+        <ng-container *ngIf="match.status === 'FINISHED'">
+          <span class="tip-points-badge" [class]="pointsClass(calcPoints(tip, match))">
+            {{ calcPoints(tip, match) }} Pkt
+            <span *ngIf="calcPoints(tip, match) === 3">✓✓</span>
+            <span *ngIf="calcPoints(tip, match) === 1">✓</span>
+            <span *ngIf="calcPoints(tip, match) === 0">✗</span>
+          </span>
+        </ng-container>
+
+        <!-- Live: aktuell mögliche Punkte -->
+        <ng-container *ngIf="match.status === 'LIVE' && calcPoints(tip, match) !== null">
+          <span class="tip-points-badge live-pts" [class]="pointsClass(calcPoints(tip, match))">
+            ⚡ {{ calcPoints(tip, match) }} Pkt
+          </span>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="empty" *ngIf="filteredMatches.length === 0">Keine Spiele gefunden.</div>
+  </div>
+</div>
