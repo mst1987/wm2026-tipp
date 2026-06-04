@@ -42,8 +42,8 @@
         <!-- Hauptzeile: Teams + Tipp + Ergebnis -->
         <div class="tip-body">
           <span class="team home">
-            {{ tip.match.teamHome }}
             <img *ngIf="tip.match.teamHomeLogo" [src]="tip.match.teamHomeLogo" [alt]="tip.match.teamHome" class="flag" />
+            {{ tip.match.teamHome }}
           </span>
 
           <div class="score-block">
@@ -62,8 +62,8 @@
           </div>
 
           <span class="team away">
-            <img *ngIf="tip.match.teamAwayLogo" [src]="tip.match.teamAwayLogo" [alt]="tip.match.teamAway" class="flag" />
             {{ tip.match.teamAway }}
+            <img *ngIf="tip.match.teamAwayLogo" [src]="tip.match.teamAwayLogo" [alt]="tip.match.teamAway" class="flag" />
           </span>
         </div>
 

@@ -190,6 +190,11 @@
   border-radius: 0.5rem;
   background: #0d1117;
   border-left: 3px solid #30363d;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+
+  &:hover { background: #161b22; }
 
   @each $g, $c in (A, #e74c3c), (B, #e67e22), (C, #f1c40f), (D, #2ecc71),
                    (E, #1abc9c), (F, #3498db), (G, #9b59b6), (H, #e91e63),
@@ -198,7 +203,17 @@
   }
 
   .up-date { font-size: 0.78rem; color: #8b949e; min-width: 100px; }
-  .up-match { flex: 1; font-size: 0.88rem; font-weight: 500; }
+  .up-match {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .up-flag { width: 20px; height: 15px; object-fit: contain; flex-shrink: 0; }
+    .up-dash { color: #8b949e; }
+  }
   .up-group { font-size: 0.72rem; color: #8b949e; white-space: nowrap; }
 }
 
