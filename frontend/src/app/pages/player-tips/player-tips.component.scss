@@ -65,14 +65,18 @@
 .tips-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
 .tip-card {
+  display: block;
   background: #161b22;
   border: 1px solid #30363d;
   border-left: 4px solid var(--gc, #30363d);
   border-radius: 0.75rem;
   padding: 0.85rem 1.1rem;
   transition: border-color 0.15s, transform 0.1s;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 
-  &:hover { transform: translateX(2px); }
+  &:hover { transform: translateX(2px); border-color: #58a6ff; }
 }
 
 .tip-head {
@@ -113,9 +117,19 @@
   flex: 1;
   font-weight: 600;
   font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 
-  &.home { text-align: right; }
-  &.away { text-align: left; }
+  &.home { justify-content: flex-end; text-align: right; }
+  &.away { justify-content: flex-start; text-align: left; }
+
+  .flag {
+    width: 22px;
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
 }
 
 .score-block {

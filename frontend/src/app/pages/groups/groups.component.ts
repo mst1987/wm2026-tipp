@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { GroupData, GroupsService, TeamStats } from '../../core/groups.service';
 
 const GROUP_COLORS: Record<string, string> = {
@@ -11,7 +12,7 @@ const GROUP_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-groups',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './groups.component.html',
   styleUrl: './groups.component.scss',
 })

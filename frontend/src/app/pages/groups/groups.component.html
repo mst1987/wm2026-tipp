@@ -98,11 +98,12 @@
           <div *ngFor="let day of data.matchdays" class="matchday">
             <div class="matchday-header">{{ day.number }}. Spieltag</div>
 
-            <div
+            <a
               *ngFor="let m of day.matches"
               class="matchday-row"
               [class.live]="m.status === 'LIVE'"
               [class.finished]="m.status === 'FINISHED'"
+              [routerLink]="['/matches', m.id]"
             >
               <span class="md-time">{{ formatDate(m.matchDate) }}</span>
 
@@ -131,7 +132,7 @@
                   <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="flag" />
                 </span>
               </div>
-            </div>
+            </a>
           </div>
         </section>
 

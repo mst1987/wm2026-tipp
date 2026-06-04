@@ -4,6 +4,32 @@
   padding: 2rem 1.5rem;
 }
 
+/* Tipp-Erinnerung */
+.tip-reminder {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(240, 192, 64, 0.12), rgba(240, 192, 64, 0.05));
+  border: 1px solid rgba(240, 192, 64, 0.35);
+  border-radius: 0.75rem;
+  text-decoration: none;
+  color: #c9d1d9;
+  transition: border-color 0.15s, transform 0.1s;
+
+  &:hover { border-color: #f0c040; transform: translateY(-1px); }
+
+  .tr-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .tr-text { flex: 1; font-size: 0.95rem; strong { color: #f0c040; } }
+  .tr-cta { font-weight: 700; color: #f0c040; font-size: 0.88rem; white-space: nowrap; }
+
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    .tr-cta { width: 100%; text-align: right; }
+  }
+}
+
 /* Hero */
 .hero {
   text-align: center;

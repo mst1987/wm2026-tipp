@@ -20,6 +20,16 @@
     </p>
   </section>
 
+  <!-- Hinweis: offene Tipps -->
+  <a routerLink="/matches" class="tip-reminder" *ngIf="auth.isLoggedIn && !loading() && untippedCount() > 0">
+    <span class="tr-icon">⚽</span>
+    <span class="tr-text">
+      Du hast <strong>{{ untippedCount() }}</strong>
+      {{ untippedCount() === 1 ? 'Spiel' : 'Spiele' }} noch nicht getippt!
+    </span>
+    <span class="tr-cta">Jetzt tippen →</span>
+  </a>
+
   <!-- Quick Links -->
   <div class="quick-links">
     <a routerLink="/matches" class="quick-link">

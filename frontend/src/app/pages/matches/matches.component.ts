@@ -181,6 +181,6 @@ export class MatchesComponent implements OnInit {
   }
 
   statusLabel(status: Match['status']): string {
-    return { SCHEDULED: 'Geplant', LIVE: 'LIVE', FINISHED: 'Beendet', POSTPONED: 'Verschoben', CANCELLED: 'Abgesagt' }[status] ?? status;
+    return { SCHEDULED: 'Upcoming', LIVE: 'LIVE', FINISHED: 'Beendet', POSTPONED: 'Verschoben', CANCELLED: 'Abgesagt' }[status] ?? status;
   }
 }

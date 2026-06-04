@@ -23,11 +23,12 @@
     </div>
 
     <div class="tips-list">
-      <div
+      <a
         *ngFor="let tip of tips()"
         class="tip-card"
         [class]="tipClass(tip)"
         [style.--gc]="groupColor(tip.match.group)"
+        [routerLink]="['/matches', tip.match.id]"
       >
         <!-- Kopfzeile: Datum + Gruppe -->
         <div class="tip-head">
@@ -40,7 +41,10 @@
 
         <!-- Hauptzeile: Teams + Tipp + Ergebnis -->
         <div class="tip-body">
-          <span class="team home">{{ tip.match.teamHome }}</span>
+          <span class="team home">
+            {{ tip.match.teamHome }}
+            <img *ngIf="tip.match.teamHomeLogo" [src]="tip.match.teamHomeLogo" [alt]="tip.match.teamHome" class="flag" />
+          </span>
 
           <div class="score-block">
             <!-- Tipp -->
@@ -57,7 +61,10 @@
             </div>
           </div>
 
-          <span class="team away">{{ tip.match.teamAway }}</span>
+          <span class="team away">
+            <img *ngIf="tip.match.teamAwayLogo" [src]="tip.match.teamAwayLogo" [alt]="tip.match.teamAway" class="flag" />
+            {{ tip.match.teamAway }}
+          </span>
         </div>
 
         <!-- Fußzeile: Punkte -->
@@ -73,7 +80,7 @@
             <span class="pts-badge pending">⏳ Ausstehend</span>
           </ng-template>
         </div>
-      </div>
+      </a>
     </div>
   </ng-container>
 

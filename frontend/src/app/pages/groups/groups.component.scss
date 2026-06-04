@@ -252,7 +252,13 @@
   margin-bottom: 0.4rem;
   font-size: 0.82rem;
   min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
 
+  &:hover { border-color: #58a6ff; }
   &.live { box-shadow: 0 0 8px rgba(63, 185, 80, 0.2); }
 }
 
