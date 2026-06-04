@@ -7,9 +7,14 @@
   <ng-container *ngIf="!loading() && user() as u">
     <div class="player-header">
       <img [src]="avatarUrl(u)" [alt]="u.username" class="avatar" />
-      <div>
+      <div class="player-info">
         <h2>{{ u.username }}</h2>
-        <p class="subtitle">{{ tips().length }} Tipps · {{ totalPoints() }} Punkte</p>
+        <div class="stat-pills">
+          <span class="pill total">{{ totalPoints() }} Punkte</span>
+          <span class="pill exact">{{ exactCount() }}× Exakt</span>
+          <span class="pill tendency">{{ tendencyCount() }}× Tendenz</span>
+          <span class="pill count">{{ tips().length }} Tipps</span>
+        </div>
       </div>
     </div>
 
@@ -20,39 +25,53 @@
     <div class="tips-list">
       <div
         *ngFor="let tip of tips()"
-        class="tip-row"
+        class="tip-card"
         [class]="tipClass(tip)"
-        [attr.data-group]="normalizeGroup(tip.match.group)"
+        [style.--gc]="groupColor(tip.match.group)"
       >
-        <div class="tip-match-info">
+        <!-- Kopfzeile: Datum + Gruppe -->
+        <div class="tip-head">
           <span class="tip-date">{{ formatDate(tip.match.matchDate) }}</span>
-          <span class="tip-group" *ngIf="tip.match.group">Gr. {{ normalizeGroup(tip.match.group) }}</span>
+          <span class="tip-group" *ngIf="tip.match.group">
+            Gruppe {{ normalizeGroup(tip.match.group) }}
+          </span>
+          <span class="tip-live" *ngIf="tip.match.status === 'LIVE'">● LIVE</span>
         </div>
 
-        <div class="tip-teams">
-          <span class="team-name">{{ tip.match.teamHome }}</span>
-          <div class="tip-scores">
-            <span class="predicted">{{ tip.predictedHome }} : {{ tip.predictedAway }}</span>
-            <span class="divider">|</span>
-            <span class="result" *ngIf="tip.match.status === 'FINISHED'">
-              {{ resultLabel(tip) }}
-            </span>
-            <span class="status-badge" *ngIf="tip.match.status !== 'FINISHED'"
-              [class]="tip.match.status.toLowerCase()">
-              {{ tip.match.status === 'LIVE' ? 'LIVE' : '–' }}
-            </span>
+        <!-- Hauptzeile: Teams + Tipp + Ergebnis -->
+        <div class="tip-body">
+          <span class="team home">{{ tip.match.teamHome }}</span>
+
+          <div class="score-block">
+            <!-- Tipp -->
+            <div class="predicted-box" title="Abgegebener Tipp">
+              <span class="box-label">Tipp</span>
+              <span class="box-score">{{ tip.predictedHome }}:{{ tip.predictedAway }}</span>
+            </div>
+
+            <!-- Ergebnis (hervorgehoben) -->
+            <div class="result-box" [class]="tipClass(tip)" [class.no-result]="!hasResult(tip)"
+                 title="Tatsächliches Ergebnis">
+              <span class="box-label">Ergebnis</span>
+              <span class="box-score">{{ resultLabel(tip) }}</span>
+            </div>
           </div>
-          <span class="team-name right">{{ tip.match.teamAway }}</span>
+
+          <span class="team away">{{ tip.match.teamAway }}</span>
         </div>
 
-        <div class="tip-points" *ngIf="tip.pointsAwarded">
-          <span class="pts" [class]="tipClass(tip)">{{ tip.points }} Pkt</span>
-          <span class="pts-label" *ngIf="tip.points === 3">Exakt ✓</span>
-          <span class="pts-label" *ngIf="tip.points === 1">Tendenz ✓</span>
-          <span class="pts-label" *ngIf="tip.points === 0">Falsch</span>
-        </div>
-        <div class="tip-points pending" *ngIf="!tip.pointsAwarded">
-          <span>Ausstehend</span>
+        <!-- Fußzeile: Punkte -->
+        <div class="tip-foot">
+          <ng-container *ngIf="tip.pointsAwarded; else pending">
+            <span class="pts-badge" [class]="tipClass(tip)">
+              <ng-container *ngIf="tip.points === 3">🎯 Exakt · +3 Punkte</ng-container>
+              <ng-container *ngIf="tip.points === 1">↗ Tendenz · +1 Punkt</ng-container>
+              <ng-container *ngIf="tip.points === 0">✗ Daneben · 0 Punkte</ng-container>
+            </span>
+          </ng-container>
+          <ng-template #pending>
+            <span class="pts-badge pending">⏳ Ausstehend</span>
+          </ng-template>
         </div>
       </div>
     </div>

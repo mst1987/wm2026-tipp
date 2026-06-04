@@ -7,6 +7,12 @@ import { Tip, TipsService } from '../../core/tips.service';
 import { User } from '../../core/auth.service';
 import { environment } from '../../../environments/environment';
 
+const GROUP_COLORS: Record<string, string> = {
+  A: '#e74c3c', B: '#e67e22', C: '#f1c40f', D: '#2ecc71',
+  E: '#1abc9c', F: '#3498db', G: '#9b59b6', H: '#e91e63',
+  I: '#ff5722', J: '#8bc34a', K: '#00bcd4', L: '#ff9800',
+};
+
 @Component({
   selector: 'app-player-tips',
   standalone: true,
@@ -49,11 +55,23 @@ export class PlayerTipsComponent implements OnInit {
     return this.tips().filter((t) => t.pointsAwarded).reduce((s, t) => s + t.points, 0);
   }
 
+  exactCount(): number {
+    return this.tips().filter((t) => t.pointsAwarded && t.points === 3).length;
+  }
+
+  tendencyCount(): number {
+    return this.tips().filter((t) => t.pointsAwarded && t.points === 1).length;
+  }
+
+  hasResult(tip: Tip): boolean {
+    const m = tip.match;
+    return (m.status === 'FINISHED' || m.status === 'LIVE') &&
+      m.scoreHome !== null && m.scoreAway !== null;
+  }
+
   resultLabel(tip: Tip): string {
     const m = tip.match;
-    if (m.status === 'FINISHED' && m.scoreHome !== null && m.scoreAway !== null) {
-      return `${m.scoreHome} : ${m.scoreAway}`;
-    }
+    if (this.hasResult(tip)) return `${m.scoreHome} : ${m.scoreAway}`;
     return '–';
   }
 
@@ -66,6 +84,11 @@ export class PlayerTipsComponent implements OnInit {
 
   normalizeGroup(group: string | null): string {
     return group ? group.replace('GROUP_', '') : '';
+  }
+
+  groupColor(group: string | null): string {
+    const g = this.normalizeGroup(group);
+    return GROUP_COLORS[g] ?? '#58a6ff';
   }
 
   formatDate(dateStr: string): string {

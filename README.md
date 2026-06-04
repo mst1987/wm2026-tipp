@@ -86,7 +86,14 @@ Wichtigste Pflichtfelder:
 | `DISCORD_CLIENT_SECRET` | Discord App → OAuth2 |
 | `DISCORD_CALLBACK_URL` | Redirect-URI (muss im Discord-Portal eingetragen sein) |
 | `JWT_SECRET` | Langer zufälliger String |
-| `FOOTBALL_API_KEY` | Kostenlos: football-data.org |
+| `FOOTBALL_API_KEY` | Kostenlos: football-data.org (Spielplan & Ergebnisse) |
+| `API_FOOTBALL_KEY` | Kostenlos: api-football.com (Match-Details: Tore, Aufstellungen, Karten, Wechsel) |
+| `ADMIN_USERNAME` | Discord-Username mit Admin-Zugriff (Standard: `devihra`) |
+
+> **Zwei APIs?** `football-data.org` liefert Spielplan & Ergebnisse (kostenloser Tier),
+> hat aber keine Tore-mit-Minute/Aufstellungen/Karten. Diese Detaildaten kommen von
+> `api-football.com` (ebenfalls kostenlos, 100 Anfragen/Tag). Die Match-Detailseite
+> mappt beide automatisch über Datum + Teamnamen und cacht die Zuordnung.
 
 ---
 

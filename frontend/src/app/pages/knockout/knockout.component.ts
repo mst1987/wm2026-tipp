@@ -1,11 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { KnockoutMatch, KnockoutStage, KnockoutService } from '../../core/knockout.service';
 
 @Component({
   selector: 'app-knockout',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './knockout.component.html',
   styleUrl: './knockout.component.scss',
 })

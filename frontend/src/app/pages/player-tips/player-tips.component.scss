@@ -16,117 +16,193 @@
 
 .loading { text-align: center; color: #8b949e; padding: 3rem; }
 
+/* Player Header */
 .player-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   margin-bottom: 2rem;
-  padding: 1.25rem 1.5rem;
-  background: #161b22;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #161b22 0%, #1c2230 100%);
   border: 1px solid #30363d;
   border-radius: 1rem;
 
   .avatar {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #f0c040;
   }
 
-  h2 { margin: 0 0 0.2rem; font-size: 1.3rem; }
+  .player-info { flex: 1; }
 
-  .subtitle { margin: 0; font-size: 0.85rem; color: #8b949e; }
+  h2 { margin: 0 0 0.6rem; font-size: 1.45rem; }
+}
+
+.stat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.pill {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #21262d;
+  color: #8b949e;
+
+  &.total    { background: rgba(240, 192, 64, 0.15); color: #f0c040; }
+  &.exact    { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+  &.tendency { background: rgba(240, 192, 64, 0.12); color: #d9b44a; }
 }
 
 .tips-empty { color: #8b949e; text-align: center; padding: 2rem; }
 
-.tips-list { display: flex; flex-direction: column; gap: 0.6rem; }
+/* Tip Cards */
+.tips-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
-.tip-row {
+.tip-card {
   background: #161b22;
   border: 1px solid #30363d;
-  border-left: 4px solid #30363d;
+  border-left: 4px solid var(--gc, #30363d);
   border-radius: 0.75rem;
-  padding: 0.9rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+  transition: border-color 0.15s, transform 0.1s;
 
-  &.exact   { border-left-color: #3fb950; }
-  &.tendency { border-left-color: #f0c040; }
-  &.wrong   { border-left-color: #f85149; }
-
-  @each $g, $c in (A, #e74c3c), (B, #e67e22), (C, #f1c40f), (D, #2ecc71),
-                   (E, #1abc9c), (F, #3498db), (G, #9b59b6), (H, #e91e63),
-                   (I, #ff5722), (J, #8bc34a), (K, #00bcd4), (L, #ff9800) {
-    &[data-group="#{$g}"] { background: rgba(0,0,0,0.1); }
-  }
+  &:hover { transform: translateX(2px); }
 }
 
-.tip-match-info {
+.tip-head {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 90px;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
 
-  .tip-date { font-size: 0.75rem; color: #8b949e; }
+  .tip-date { font-size: 0.74rem; color: #8b949e; }
+
   .tip-group {
-    font-size: 0.72rem;
-    color: #8b949e;
-    background: #21262d;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0d1117;
+    background: var(--gc, #58a6ff);
     border-radius: 999px;
-    padding: 0.1rem 0.4rem;
-    width: fit-content;
+    padding: 0.1rem 0.55rem;
+  }
+
+  .tip-live {
+    margin-left: auto;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3fb950;
+    animation: blink 1.2s infinite;
   }
 }
 
-.tip-teams {
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.tip-body {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.team {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.92rem;
 
-  .team-name { font-weight: 600; font-size: 0.9rem; flex: 1; }
-  .team-name.right { text-align: right; }
+  &.home { text-align: right; }
+  &.away { text-align: left; }
 }
 
-.tip-scores {
+.score-block {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0.4rem;
-  white-space: nowrap;
-
-  .predicted { font-weight: 700; font-size: 1.05rem; color: #c9d1d9; }
-  .divider { color: #30363d; }
-  .result { font-size: 0.88rem; color: #8b949e; }
+  flex-shrink: 0;
 }
 
-.status-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  &.live { background: #3fb950; color: #0d1117; }
-  &.scheduled { color: #8b949e; }
-}
-
-.tip-points {
-  min-width: 70px;
-  text-align: right;
+.predicted-box,
+.result-box {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 0.1rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 62px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #30363d;
 
-  &.pending { color: #8b949e; font-size: 0.78rem; }
-
-  .pts {
-    font-weight: 700;
-    font-size: 1rem;
-    &.exact    { color: #3fb950; }
-    &.tendency { color: #f0c040; }
-    &.wrong    { color: #f85149; }
+  .box-label {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8b949e;
+    margin-bottom: 0.1rem;
   }
 
-  .pts-label { font-size: 0.72rem; color: #8b949e; }
+  .box-score {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #c9d1d9;
+  }
+}
+
+/* Tipp-Box dezent */
+.predicted-box {
+  background: #0d1117;
+}
+
+/* Ergebnis-Box hervorgehoben */
+.result-box {
+  background: #1c2230;
+  border-width: 2px;
+
+  .box-score { font-size: 1.2rem; }
+
+  &.no-result .box-score { color: #484f58; }
+
+  &.exact {
+    background: rgba(63, 185, 80, 0.12);
+    border-color: #3fb950;
+    .box-score { color: #3fb950; }
+  }
+  &.tendency {
+    background: rgba(240, 192, 64, 0.12);
+    border-color: #f0c040;
+    .box-score { color: #f0c040; }
+  }
+  &.wrong {
+    background: rgba(248, 81, 73, 0.1);
+    border-color: #f85149;
+    .box-score { color: #f85149; }
+  }
+}
+
+.tip-foot {
+  margin-top: 0.7rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pts-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: #21262d;
+  color: #8b949e;
+
+  &.exact    { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+  &.tendency { background: rgba(240, 192, 64, 0.15); color: #f0c040; }
+  &.wrong    { background: rgba(248, 81, 73, 0.12); color: #f85149; }
+  &.pending  { background: #21262d; color: #8b949e; }
+}
+
+@media (max-width: 540px) {
+  .team { font-size: 0.8rem; }
+  .predicted-box, .result-box { min-width: 52px; }
 }

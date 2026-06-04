@@ -20,6 +20,7 @@
           *ngFor="let m of stage.matches"
           class="match-card"
           [class]="matchClass(m)"
+          [routerLink]="['/matches', m.id]"
         >
           <div class="match-date">{{ formatDate(m.matchDate) }}</div>
 

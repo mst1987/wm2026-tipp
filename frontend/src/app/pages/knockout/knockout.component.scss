@@ -68,6 +68,10 @@
   border-radius: 0.75rem;
   padding: 0.85rem 1rem;
   transition: border-color 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
 
   &:hover { border-color: #58a6ff; }
 

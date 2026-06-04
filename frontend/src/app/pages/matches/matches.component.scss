@@ -213,6 +213,20 @@
   .tip-result { font-weight: 600; color: #c9d1d9; }
 }
 
+.detail-link {
+  display: block;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #21262d;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #58a6ff;
+  text-decoration: none;
+  transition: color 0.15s;
+
+  &:hover { color: #79c0ff; text-decoration: underline; }
+}
+
 .tip-points-badge {
   margin-left: auto;
   padding: 0.2rem 0.6rem;

@@ -117,6 +117,10 @@
           </span>
         </ng-container>
       </div>
+
+      <a class="detail-link" [routerLink]="['/matches', match.id]">
+        Spieldetails ansehen →
+      </a>
     </div>
 
     <div class="empty" *ngIf="filteredMatches.length === 0">Keine Spiele gefunden.</div>

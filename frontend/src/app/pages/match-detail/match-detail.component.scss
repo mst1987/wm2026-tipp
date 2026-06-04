@@ -1,0 +1,307 @@
+.match-detail-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.back-link {
+  display: inline-block;
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 0.88rem;
+  margin-bottom: 1.25rem;
+  &:hover { text-decoration: underline; }
+}
+
+.loading { text-align: center; color: #8b949e; padding: 3rem; }
+
+/* Scoreboard */
+.scoreboard {
+  background: linear-gradient(135deg, #161b22 0%, #1c2230 100%);
+  border: 1px solid #30363d;
+  border-top: 4px solid var(--gc, #58a6ff);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.stage-chip, .group-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+}
+.stage-chip { background: #21262d; color: #c9d1d9; }
+.group-chip { background: var(--gc, #58a6ff); color: #0d1117; }
+
+.live-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #3fb950;
+  animation: blink 1.2s infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.team-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  .crest { width: 56px; height: 56px; object-fit: contain; }
+  .team-name { font-weight: 700; font-size: 1rem; text-align: center; }
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 2.4rem;
+  font-weight: 800;
+
+  .colon { color: #484f58; }
+  .vs-text { font-size: 1.2rem; color: #8b949e; font-weight: 600; }
+}
+
+.scorers-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #21262d;
+
+  .scorers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.78rem;
+    color: #8b949e;
+
+    &.away { text-align: right; }
+  }
+}
+
+.meta-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  font-size: 0.78rem;
+  color: #8b949e;
+}
+
+.score-breakdown {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.74rem;
+  color: #8b949e;
+
+  span {
+    background: #0d1117;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+  }
+}
+
+/* Info-Box */
+.info-box {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  background: rgba(88, 166, 255, 0.06);
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+
+  .info-icon { font-size: 1.3rem; }
+  strong { display: block; margin-bottom: 0.2rem; }
+  p { margin: 0; font-size: 0.85rem; color: #8b949e; }
+}
+
+/* Panels */
+.panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel-title {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--gc, #58a6ff);
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tl-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  &.away {
+    flex-direction: row-reverse;
+    .tl-content { justify-content: flex-end; }
+    .ev { flex-direction: row-reverse; text-align: right; }
+    .ev-text { align-items: flex-end; }
+  }
+}
+
+.tl-minute {
+  flex-shrink: 0;
+  min-width: 42px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #8b949e;
+  background: #0d1117;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.4rem;
+}
+
+.tl-content { flex: 1; display: flex; }
+
+.ev {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  .ev-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+  .ev-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+
+    strong { font-size: 0.9rem; }
+    .ev-sub { font-size: 0.74rem; color: #8b949e; }
+    .ev-sub.out { color: #f85149; }
+    strong.in { color: #3fb950; }
+  }
+
+  .ev-tag {
+    display: inline-block;
+    font-size: 0.64rem;
+    font-weight: 700;
+    background: rgba(240, 192, 64, 0.15);
+    color: #f0c040;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    margin-left: 0.3rem;
+
+    &.own { background: rgba(248, 81, 73, 0.15); color: #f85149; }
+  }
+
+  &.goal .ev-icon { font-size: 1.2rem; }
+}
+
+/* Karten-Icon */
+.card-icon {
+  display: inline-block;
+  width: 13px;
+  height: 18px;
+  border-radius: 2px;
+
+  &.yellow { background: #f0c040; }
+  &.red    { background: #f85149; }
+}
+
+/* Lineups */
+.lineups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.lineup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+
+  .lu-team { font-weight: 700; font-size: 0.95rem; }
+  .lu-formation {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0d1117;
+    background: #58a6ff;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+  }
+}
+
+.lu-coach {
+  font-size: 0.74rem;
+  color: #8b949e;
+  margin-bottom: 0.75rem;
+}
+
+.lu-group { margin-bottom: 1rem; &:last-child { margin-bottom: 0; } }
+
+.lu-group-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b949e;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.lu-player {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.4rem;
+  font-size: 0.84rem;
+
+  &:hover { background: #21262d; }
+  &.sub { opacity: 0.75; }
+
+  .num {
+    min-width: 22px;
+    text-align: center;
+    font-weight: 700;
+    color: #8b949e;
+    font-size: 0.78rem;
+  }
+  .name { flex: 1; }
+  .pos {
+    font-size: 0.66rem;
+    color: #8b949e;
+    background: #21262d;
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.3rem;
+  }
+}

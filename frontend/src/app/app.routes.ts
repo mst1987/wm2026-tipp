@@ -33,6 +33,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'matches/:id',
+        loadComponent: () =>
+          import('./pages/match-detail/match-detail.component').then(
+            (m) => m.MatchDetailComponent,
+          ),
+      },
+      {
         path: 'admin',
         loadComponent: () =>
           import('./pages/admin/admin.component').then((m) => m.AdminComponent),

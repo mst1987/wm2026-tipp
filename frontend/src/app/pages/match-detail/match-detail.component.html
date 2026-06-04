@@ -1,0 +1,153 @@
+<div class="match-detail-page">
+
+  <a routerLink="/matches" class="back-link">← Zurück zu den Spielen</a>
+
+  <div class="loading" *ngIf="loading()">Lade Spieldetails...</div>
+
+  <ng-container *ngIf="!loading() && match() as m">
+
+    <!-- Scoreboard -->
+    <div class="scoreboard" [style.--gc]="groupColor(m.group)">
+      <div class="meta-top">
+        <span class="stage-chip">{{ stageLabel(m.stage) }}</span>
+        <span class="group-chip" *ngIf="m.group">Gruppe {{ normalizeGroup(m.group) }}</span>
+        <span class="live-chip" *ngIf="m.status === 'LIVE'">
+          ● LIVE <ng-container *ngIf="details()?.elapsed">{{ details()?.elapsed }}'</ng-container>
+        </span>
+      </div>
+
+      <div class="teams">
+        <div class="team-side">
+          <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="crest" />
+          <span class="team-name">{{ m.teamHome }}</span>
+        </div>
+
+        <div class="score">
+          <ng-container *ngIf="hasScore(); else vs">
+            <span class="num">{{ displayScore().home }}</span>
+            <span class="colon">:</span>
+            <span class="num">{{ displayScore().away }}</span>
+          </ng-container>
+          <ng-template #vs><span class="vs-text">vs</span></ng-template>
+        </div>
+
+        <div class="team-side">
+          <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="crest" />
+          <span class="team-name">{{ m.teamAway }}</span>
+        </div>
+      </div>
+
+      <!-- Torschützen-Kurzübersicht -->
+      <div class="scorers-row" *ngIf="details()?.available && (goalScorers('home').length || goalScorers('away').length)">
+        <div class="scorers home">
+          <span *ngFor="let g of goalScorers('home')" class="scorer">
+            ⚽ {{ g.player }} {{ minuteLabel(g.minute, g.extra) }}<span *ngIf="g.isPenalty"> (E)</span><span *ngIf="g.isOwnGoal"> (ET)</span>
+          </span>
+        </div>
+        <div class="scorers away">
+          <span *ngFor="let g of goalScorers('away')" class="scorer">
+            ⚽ {{ g.player }} {{ minuteLabel(g.minute, g.extra) }}<span *ngIf="g.isPenalty"> (E)</span><span *ngIf="g.isOwnGoal"> (ET)</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="meta-bottom">
+        <span>📅 {{ formatDate(m.matchDate) }}</span>
+        <span *ngIf="details()?.venue">📍 {{ details()?.venue }}</span>
+        <span *ngIf="details()?.referee">🧑‍⚖️ {{ details()?.referee }}</span>
+      </div>
+
+      <!-- Halbzeit / Verlängerung / Elfmeter -->
+      <div class="score-breakdown" *ngIf="details()?.available && details()?.score as s">
+        <span *ngIf="s.halftime.home !== null">HZ {{ s.halftime.home }}:{{ s.halftime.away }}</span>
+        <span *ngIf="s.extratime.home !== null">n.V. {{ s.extratime.home }}:{{ s.extratime.away }}</span>
+        <span *ngIf="s.penalty.home !== null">i.E. {{ s.penalty.home }}:{{ s.penalty.away }}</span>
+      </div>
+    </div>
+
+    <!-- Hinweis wenn keine Detaildaten -->
+    <div class="info-box" *ngIf="details() && !details()?.available">
+      <span class="info-icon">ℹ️</span>
+      <div>
+        <strong>Noch keine Detaildaten</strong>
+        <p>{{ details()?.message }}</p>
+      </div>
+    </div>
+
+    <!-- Timeline: Tore, Karten, Wechsel -->
+    <section class="panel" *ngIf="hasEvents()">
+      <h3 class="panel-title">Spielverlauf</h3>
+      <div class="timeline">
+        <div *ngFor="let ev of timeline()" class="tl-item" [class.away]="ev.team === 'away'">
+          <div class="tl-minute">{{ minuteLabel(ev.minute, ev.extra) }}</div>
+
+          <div class="tl-content" [ngSwitch]="ev.kind">
+            <!-- Tor -->
+            <div *ngSwitchCase="'goal'" class="ev goal">
+              <span class="ev-icon">⚽</span>
+              <span class="ev-text">
+                <strong>{{ ev.player }}</strong>
+                <span class="ev-sub" *ngIf="ev.assist">Vorlage: {{ ev.assist }}</span>
+                <span class="ev-tag" *ngIf="ev.isPenalty">Elfmeter</span>
+                <span class="ev-tag own" *ngIf="ev.isOwnGoal">Eigentor</span>
+              </span>
+            </div>
+
+            <!-- Karte -->
+            <div *ngSwitchCase="'card'" class="ev card">
+              <span class="ev-icon card-icon" [class.yellow]="ev.card === 'yellow'" [class.red]="ev.card === 'red'"></span>
+              <span class="ev-text">
+                <strong>{{ ev.player }}</strong>
+                <span class="ev-sub">{{ ev.card === 'red' ? 'Rote Karte' : 'Gelbe Karte' }}</span>
+              </span>
+            </div>
+
+            <!-- Wechsel -->
+            <div *ngSwitchCase="'sub'" class="ev sub">
+              <span class="ev-icon">🔁</span>
+              <span class="ev-text">
+                <strong class="in">▲ {{ ev.playerIn }}</strong>
+                <span class="ev-sub out">▼ {{ ev.playerOut }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aufstellungen -->
+    <section class="panel" *ngIf="hasLineups()">
+      <h3 class="panel-title">Aufstellungen</h3>
+      <div class="lineups">
+        <div class="lineup" *ngFor="let side of ['home','away']">
+          <ng-container *ngIf="(side === 'home' ? details()?.lineups?.home : details()?.lineups?.away) as lu">
+            <div class="lineup-head">
+              <span class="lu-team">{{ lu.teamName }}</span>
+              <span class="lu-formation" *ngIf="lu.formation">{{ lu.formation }}</span>
+            </div>
+            <div class="lu-coach" *ngIf="lu.coach">Trainer: {{ lu.coach }}</div>
+
+            <div class="lu-group">
+              <div class="lu-group-title">Startelf</div>
+              <div *ngFor="let p of lu.startXI" class="lu-player">
+                <span class="num">{{ p.number }}</span>
+                <span class="name">{{ p.name }}</span>
+                <span class="pos" *ngIf="p.pos">{{ p.pos }}</span>
+              </div>
+            </div>
+
+            <div class="lu-group" *ngIf="lu.substitutes.length">
+              <div class="lu-group-title">Ersatzbank</div>
+              <div *ngFor="let p of lu.substitutes" class="lu-player sub">
+                <span class="num">{{ p.number }}</span>
+                <span class="name">{{ p.name }}</span>
+                <span class="pos" *ngIf="p.pos">{{ p.pos }}</span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

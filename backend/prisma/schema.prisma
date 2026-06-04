@@ -25,18 +25,19 @@ model User {
 }
 
 model Match {
-  id           String      @id @default(cuid())
-  externalId   Int?        @unique @map("external_id")
-  matchDate    DateTime    @map("match_date")
-  teamHome     String      @map("team_home")
-  teamAway     String      @map("team_away")
-  teamHomeLogo String?     @map("team_home_logo")
-  teamAwayLogo String?     @map("team_away_logo")
-  scoreHome    Int?        @map("score_home")
-  scoreAway    Int?        @map("score_away")
-  status       MatchStatus @default(SCHEDULED)
-  stage        String
-  group        String?
+  id            String      @id @default(cuid())
+  externalId    Int?        @unique @map("external_id")
+  apiFootballId Int?        @map("api_football_id")
+  matchDate     DateTime    @map("match_date")
+  teamHome      String      @map("team_home")
+  teamAway      String      @map("team_away")
+  teamHomeLogo  String?     @map("team_home_logo")
+  teamAwayLogo  String?     @map("team_away_logo")
+  scoreHome     Int?        @map("score_home")
+  scoreAway     Int?        @map("score_away")
+  status        MatchStatus @default(SCHEDULED)
+  stage         String
+  group         String?
 
   tips         Tip[]
 
