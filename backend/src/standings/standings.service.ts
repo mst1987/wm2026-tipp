@@ -18,6 +18,7 @@ export class StandingsService {
         discordId: user.discordId,
         username: user.username,
         avatar: user.avatar,
+        hasPaid: user.hasPaid,
         totalPoints: user.tips.reduce((sum, t) => sum + t.points, 0),
         tipsCount: user.tips.length,
         awardedTips: user.tips.filter((t) => t.pointsAwarded).length,

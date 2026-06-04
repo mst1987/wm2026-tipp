@@ -8,6 +8,7 @@ export interface Standing {
   discordId: string;
   username: string;
   avatar: string | null;
+  hasPaid: boolean;
   totalPoints: number;
   tipsCount: number;
   awardedTips: number;

@@ -11,6 +11,7 @@
       <a routerLink="/groups" routerLinkActive="active" (click)="menuOpen = false">Gruppen</a>
       <a routerLink="/knockout" routerLinkActive="active" (click)="menuOpen = false">K.O.-Runden</a>
       <a routerLink="/standings" routerLinkActive="active" (click)="menuOpen = false">Rangliste</a>
+      <a routerLink="/admin" routerLinkActive="active" (click)="menuOpen = false" *ngIf="auth.currentUser()?.username === 'devihra'">⚙️ Admin</a>
     </div>
 
     <div class="nav-right">

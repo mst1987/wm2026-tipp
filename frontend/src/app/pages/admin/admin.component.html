@@ -1,0 +1,59 @@
+<div class="admin-page">
+
+  <div class="no-access" *ngIf="!isAdmin">
+    <p>🚫 Kein Zugriff</p>
+  </div>
+
+  <ng-container *ngIf="isAdmin">
+    <div class="page-header">
+      <h2>⚙️ Admin Dashboard</h2>
+      <p class="subtitle">Spielerverwaltung · Einsatz: 100g auf Thunderstrike</p>
+    </div>
+
+    <div class="loading" *ngIf="loading()">Lade Spieler...</div>
+
+    <div class="stats-bar" *ngIf="!loading()">
+      <span>{{ users().length }} Teilnehmer</span>
+      <span class="paid">{{ paidCount }} bezahlt</span>
+      <span class="unpaid">{{ unpaidCount }} ausstehend</span>
+    </div>
+
+    <div class="users-list" *ngIf="!loading()">
+      <div *ngFor="let user of users()" class="user-row" [class.paid]="user.hasPaid">
+
+        <!-- Bestätigungs-Dialog -->
+        <div class="confirm-overlay" *ngIf="confirmDelete() === user.id">
+          <span>Wirklich löschen?</span>
+          <button class="btn-confirm" (click)="confirmDeleteUser(user.id)">Ja, löschen</button>
+          <button class="btn-cancel" (click)="cancelDelete()">Abbrechen</button>
+        </div>
+
+        <img [src]="avatarUrl(user)" [alt]="user.username" class="avatar" />
+
+        <div class="user-info">
+          <span class="username">{{ user.username }}</span>
+          <span class="tips-count">{{ user.tips.length }} Tipps · {{ totalPoints(user) }} Pkt</span>
+        </div>
+
+        <!-- Zahlung -->
+        <button
+          class="btn-payment"
+          [class.paid]="user.hasPaid"
+          (click)="togglePayment(user)"
+          [title]="user.hasPaid ? 'Als nicht bezahlt markieren' : 'Als bezahlt markieren'"
+        >
+          <span class="dollar">$</span>
+          {{ user.hasPaid ? 'Bezahlt' : 'Ausstehend' }}
+        </button>
+
+        <!-- Löschen -->
+        <button class="btn-delete" (click)="askDelete(user.id)" title="Spieler entfernen">
+          🗑
+        </button>
+      </div>
+
+      <div class="empty" *ngIf="users().length === 0">Keine Teilnehmer.</div>
+    </div>
+  </ng-container>
+
+</div>

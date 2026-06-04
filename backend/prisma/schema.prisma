@@ -15,6 +15,7 @@ model User {
   discriminator String?
   avatar        String?
   email         String?
+  hasPaid       Boolean  @default(false) @map("has_paid")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

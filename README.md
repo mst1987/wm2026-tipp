@@ -42,9 +42,13 @@ Ein Tippspiel für die FIFA Weltmeisterschaft 2026 mit Discord-Login, Live-Ergeb
 git clone https://github.com/dein-repo/wm2026-tipp.git
 cd wm2026-tipp
 
-# 2. .env anlegen
+# 2. .env für lokale Entwicklung anlegen (im backend/-Verzeichnis!)
 cp .env.example backend/.env
 # Werte in backend/.env eintragen (Discord-Keys, JWT-Secret etc.)
+#
+# Hinweis: Für den Server (Docker/Deployment) liegt die .env im ROOT-Verzeichnis.
+# Lokal:  backend/.env  ← NestJS liest von hier (beim Start aus backend/)
+# Server: .env          ← Docker Compose liest von hier (docker-compose.yml)
 
 # 3. PostgreSQL starten
 docker compose up postgres -d

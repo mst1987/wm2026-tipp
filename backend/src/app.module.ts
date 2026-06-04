@@ -11,6 +11,7 @@ import { FootballApiModule } from './football-api/football-api.module';
 import { DiscordBotModule } from './discord-bot/discord-bot.module';
 import { GroupsModule } from './groups/groups.module';
 import { KnockoutModule } from './knockout/knockout.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { KnockoutModule } from './knockout/knockout.module';
     DiscordBotModule,
     GroupsModule,
     KnockoutModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

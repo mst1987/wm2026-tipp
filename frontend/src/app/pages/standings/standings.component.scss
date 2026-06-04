@@ -87,6 +87,16 @@
   text-align: right;
 }
 
+.payment-badge {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #484f58;
+  min-width: 18px;
+  text-align: center;
+
+  &.paid { color: #3fb950; }
+}
+
 .arrow {
   font-size: 1.2rem;
   color: #8b949e;

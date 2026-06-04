@@ -22,6 +22,7 @@
         <span class="you" *ngIf="auth.currentUser()?.id === entry.id">(Du)</span>
       </span>
       <span class="stats">{{ entry.awardedTips }}/{{ entry.tipsCount }} Tipps</span>
+      <span class="payment-badge" [class.paid]="entry.hasPaid" [title]="entry.hasPaid ? 'Einsatz bezahlt' : 'Einsatz ausstehend'">$</span>
       <span class="points">{{ entry.totalPoints }} Pkt</span>
       <span class="arrow">›</span>
     </div>

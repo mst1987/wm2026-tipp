@@ -1,0 +1,161 @@
+.admin-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.no-access {
+  text-align: center;
+  padding: 4rem;
+  color: #f85149;
+  font-size: 1.2rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+  h2 { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 700; }
+  .subtitle { margin: 0; font-size: 0.85rem; color: #8b949e; }
+}
+
+.loading { text-align: center; color: #8b949e; padding: 3rem; }
+
+.stats-bar {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: #8b949e;
+
+  .paid   { color: #3fb950; font-weight: 600; }
+  .unpaid { color: #f85149; font-weight: 600; }
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 0.75rem;
+  transition: border-color 0.15s;
+
+  &.paid { border-left: 3px solid #3fb950; }
+}
+
+.confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 17, 23, 0.95);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  z-index: 10;
+
+  span { color: #f85149; font-weight: 600; }
+}
+
+.btn-confirm {
+  padding: 0.35rem 0.8rem;
+  background: #da3633;
+  color: #fff;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.82rem;
+  &:hover { background: #f85149; }
+}
+
+.btn-cancel {
+  padding: 0.35rem 0.8rem;
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+  &:hover { background: #30363d; }
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+
+  .username { font-weight: 600; font-size: 0.95rem; }
+  .tips-count { font-size: 0.76rem; color: #8b949e; }
+}
+
+.btn-payment {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #30363d;
+  background: #21262d;
+  color: #8b949e;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  .dollar { font-weight: 800; font-size: 0.95rem; }
+
+  &.paid {
+    background: rgba(63, 185, 80, 0.1);
+    border-color: #3fb950;
+    color: #3fb950;
+  }
+
+  &:not(.paid):hover {
+    border-color: #3fb950;
+    color: #3fb950;
+  }
+
+  &.paid:hover {
+    background: rgba(248, 81, 73, 0.1);
+    border-color: #f85149;
+    color: #f85149;
+  }
+}
+
+.btn-delete {
+  background: none;
+  border: 1px solid #30363d;
+  border-radius: 0.4rem;
+  color: #8b949e;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.15s;
+
+  &:hover { border-color: #f85149; color: #f85149; }
+}
+
+.empty { text-align: center; color: #8b949e; padding: 2rem; }
