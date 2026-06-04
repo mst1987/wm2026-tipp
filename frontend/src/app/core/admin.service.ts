@@ -11,6 +11,23 @@ export interface AdminUser {
   tips: { points: number; pointsAwarded: boolean }[];
 }
 
+export interface ApiStatus {
+  configured: boolean;
+  lastCallAt: string | null;
+  callsToday: number;
+  dailyLimit: number;
+  lastSyncAt: string | null;
+  syncedMatches: number;
+  totalMatches: number;
+  isSyncing: boolean;
+}
+
+export interface SyncResult {
+  synced: number;
+  skipped: string | null;
+  status: ApiStatus;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private base = `${environment.apiUrl}/admin`;
@@ -27,5 +44,13 @@ export class AdminService {
 
   deleteUser(userId: string) {
     return this.http.delete(`${this.base}/users/${userId}`);
+  }
+
+  getApiStatus() {
+    return this.http.get<ApiStatus>(`${this.base}/api-status`);
+  }
+
+  syncDetails() {
+    return this.http.post<SyncResult>(`${this.base}/sync-details`, {});
   }
 }

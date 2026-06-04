@@ -10,6 +10,54 @@
       <p class="subtitle">Spielerverwaltung · Einsatz: 100g auf Thunderstrike</p>
     </div>
 
+    <!-- API-Football Status -->
+    <div class="api-panel" *ngIf="apiStatus() as s">
+      <div class="api-head">
+        <h3>📡 API-Football Status</h3>
+        <span class="api-config" [class.off]="!s.configured">
+          {{ s.configured ? 'Aktiv' : 'Nicht konfiguriert' }}
+        </span>
+      </div>
+
+      <div class="api-grid">
+        <div class="api-stat">
+          <span class="label">Letzter API-Call</span>
+          <span class="value">{{ timeAgo(s.lastCallAt) }}</span>
+        </div>
+        <div class="api-stat">
+          <span class="label">Letzter Sync</span>
+          <span class="value">{{ timeAgo(s.lastSyncAt) }}</span>
+        </div>
+        <div class="api-stat">
+          <span class="label">Spiele synchronisiert</span>
+          <span class="value">{{ s.syncedMatches }} / {{ s.totalMatches }}</span>
+        </div>
+      </div>
+
+      <!-- Tageslimit -->
+      <div class="api-limit">
+        <div class="limit-head">
+          <span class="label">Calls heute (Limit {{ s.dailyLimit }})</span>
+          <span class="limit-count" [class]="callsClass()">{{ s.callsToday }} / {{ s.dailyLimit }}</span>
+        </div>
+        <div class="limit-bar">
+          <div class="limit-fill" [class]="callsClass()" [style.width.%]="callsPercent()"></div>
+        </div>
+      </div>
+
+      <div class="api-actions">
+        <button class="btn-sync" (click)="runSync()" [disabled]="syncing() || !s.configured">
+          <ng-container *ngIf="syncing()">⏳ Synchronisiere...</ng-container>
+          <ng-container *ngIf="!syncing()">🔄 Jetzt synchronisieren</ng-container>
+        </button>
+        <span class="sync-msg" *ngIf="syncMessage()">{{ syncMessage() }}</span>
+      </div>
+
+      <p class="api-hint">
+        Automatischer Sync alle 15 Minuten (nur laufende, kürzlich beendete und bald startende Spiele).
+      </p>
+    </div>
+
     <div class="loading" *ngIf="loading()">Lade Spieler...</div>
 
     <div class="stats-bar" *ngIf="!loading()">

@@ -1,15 +1,19 @@
-import { Controller, Get, Patch, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
+import { MatchDetailsService } from '../match-details/match-details.service';
 
 @ApiTags('admin')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), AdminGuard)
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly matchDetailsService: MatchDetailsService,
+  ) {}
 
   @Get('users')
   getUsers() {
@@ -24,5 +28,17 @@ export class AdminController {
   @Delete('users/:id')
   deleteUser(@Param('id') id: string) {
     return this.adminService.deleteUser(id);
+  }
+
+  // ─── API-Football: Status & manueller Sync ───
+
+  @Get('api-status')
+  getApiStatus() {
+    return this.matchDetailsService.getApiStatus();
+  }
+
+  @Post('sync-details')
+  syncDetails() {
+    return this.matchDetailsService.manualSync();
   }
 }

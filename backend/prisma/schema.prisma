@@ -39,12 +39,28 @@ model Match {
   stage         String
   group         String?
 
+  // Zwischengespeicherte Match-Details von API-Football (Tore, Aufstellungen, Karten, Wechsel)
+  detailsJson     Json?     @map("details_json")
+  detailsSyncedAt DateTime? @map("details_synced_at")
+
   tips         Tip[]
 
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("matches")
+}
+
+/// Protokolliert jeden API-Football-Aufruf, um das Tageslimit (100/Tag) zu überwachen
+model ApiCallLog {
+  id        String   @id @default(cuid())
+  provider  String   @default("api-football")
+  endpoint  String
+  success   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("api_call_logs")
 }
 
 model Tip {

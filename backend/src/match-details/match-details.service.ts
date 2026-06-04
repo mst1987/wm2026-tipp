@@ -1,5 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron } from '@nestjs/schedule';
+import { Match, MatchStatus } from '@prisma/client';
 import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -9,7 +11,7 @@ export interface GoalEvent {
   team: 'home' | 'away';
   player: string;
   assist: string | null;
-  detail: string;       // "Normal Goal", "Penalty", "Own Goal"
+  detail: string;
   isOwnGoal: boolean;
   isPenalty: boolean;
 }
@@ -48,6 +50,7 @@ export interface TeamLineup {
 export interface MatchDetails {
   available: boolean;
   message?: string;
+  syncedAt?: string | null;
   venue?: string | null;
   referee?: string | null;
   status?: string;
@@ -66,83 +69,239 @@ export interface MatchDetails {
   lineups?: { home: TeamLineup | null; away: TeamLineup | null };
 }
 
-interface CacheEntry { data: MatchDetails; expires: number; }
+export interface ApiStatus {
+  configured: boolean;
+  lastCallAt: string | null;
+  callsToday: number;
+  dailyLimit: number;
+  lastSyncAt: string | null;
+  syncedMatches: number;
+  totalMatches: number;
+  isSyncing: boolean;
+}
+
+const DAILY_LIMIT = 100;
+const SAFETY_MARGIN = 5; // ab 95 Calls keine automatischen Syncs mehr
+const MAX_MATCHES_PER_RUN = 12;
 
 @Injectable()
 export class MatchDetailsService {
   private readonly logger = new Logger(MatchDetailsService.name);
-  private readonly cache = new Map<string, CacheEntry>();
-
-  // Beendete Spiele 1h cachen, laufende/zukünftige nur 60s
-  private readonly TTL_FINISHED = 60 * 60 * 1000;
-  private readonly TTL_OTHER = 60 * 1000;
+  private syncing = false;
 
   constructor(
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
   ) {}
 
+  // ─── Öffentlich: Detail-Abruf aus der DB (kein API-Call beim Seitenaufruf) ───
+
   async getDetails(matchId: string): Promise<MatchDetails> {
     const match = await this.prisma.match.findUnique({ where: { id: matchId } });
     if (!match) throw new NotFoundException('Spiel nicht gefunden');
 
-    const cached = this.cache.get(matchId);
-    if (cached && cached.expires > Date.now()) return cached.data;
-
-    const apiKey = this.config.get<string>('API_FOOTBALL_KEY');
-    if (!apiKey || apiKey === 'your_api_football_key') {
-      return { available: false, message: 'API-Football ist nicht konfiguriert (API_FOOTBALL_KEY fehlt).' };
+    if (match.detailsJson) {
+      const data = match.detailsJson as unknown as MatchDetails;
+      return { ...data, syncedAt: match.detailsSyncedAt?.toISOString() ?? null };
     }
 
+    if (!this.isConfigured()) {
+      return { available: false, message: 'API-Football ist nicht konfiguriert (API_FOOTBALL_KEY fehlt).' };
+    }
+    return {
+      available: false,
+      message: 'Für dieses Spiel wurden noch keine Detaildaten synchronisiert.',
+      syncedAt: null,
+    };
+  }
+
+  // ─── Admin: Status & manueller Sync ───
+
+  async getApiStatus(): Promise<ApiStatus> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const [lastCall, callsToday, lastSynced, syncedMatches, totalMatches] = await Promise.all([
+      this.prisma.apiCallLog.findFirst({ orderBy: { createdAt: 'desc' } }),
+      this.prisma.apiCallLog.count({ where: { createdAt: { gte: startOfDay } } }),
+      this.prisma.match.findFirst({
+        where: { detailsSyncedAt: { not: null } },
+        orderBy: { detailsSyncedAt: 'desc' },
+      }),
+      this.prisma.match.count({ where: { detailsSyncedAt: { not: null } } }),
+      this.prisma.match.count(),
+    ]);
+
+    return {
+      configured: this.isConfigured(),
+      lastCallAt: lastCall?.createdAt.toISOString() ?? null,
+      callsToday,
+      dailyLimit: DAILY_LIMIT,
+      lastSyncAt: lastSynced?.detailsSyncedAt?.toISOString() ?? null,
+      syncedMatches,
+      totalMatches,
+      isSyncing: this.syncing,
+    };
+  }
+
+  /** Manuell durch den Admin ausgelöster Sync. */
+  async manualSync(): Promise<{ synced: number; skipped: string | null; status: ApiStatus }> {
+    const result = await this.runSync(true);
+    const status = await this.getApiStatus();
+    return { ...result, status };
+  }
+
+  // ─── Cron: alle 15 Minuten relevante Spiele synchronisieren ───
+
+  @Cron('0 */15 * * * *') // alle 15 Minuten
+  async scheduledSync() {
+    await this.runSync(false);
+  }
+
+  /**
+   * Synchronisiert nur "relevante" Spiele, um das Tageslimit zu schonen:
+   * - laufende Spiele (LIVE)
+   * - beendete Spiele, deren Details noch nicht final geladen wurden
+   * - Spiele, die in den nächsten 90 Minuten starten (für Aufstellungen)
+   */
+  private async runSync(manual: boolean): Promise<{ synced: number; skipped: string | null }> {
+    if (!this.isConfigured()) {
+      return { synced: 0, skipped: 'API-Football ist nicht konfiguriert.' };
+    }
+    if (this.syncing) {
+      return { synced: 0, skipped: 'Ein Sync läuft bereits.' };
+    }
+
+    const callsToday = await this.countCallsToday();
+    if (callsToday >= DAILY_LIMIT - SAFETY_MARGIN) {
+      return { synced: 0, skipped: `Tageslimit fast erreicht (${callsToday}/${DAILY_LIMIT}).` };
+    }
+
+    this.syncing = true;
     try {
-      // 1. Fixture-ID auflösen (und cachen)
-      let fixtureId = match.apiFootballId;
-      if (!fixtureId) {
-        fixtureId = await this.resolveFixtureId(match.teamHome, match.teamAway, match.matchDate, apiKey);
-        if (fixtureId) {
-          await this.prisma.match.update({ where: { id: matchId }, data: { apiFootballId: fixtureId } });
-        }
+      const matches = await this.findRelevantMatches();
+      let synced = 0;
+
+      for (const match of matches.slice(0, MAX_MATCHES_PER_RUN)) {
+        // Budget-Schutz auch innerhalb der Schleife
+        if ((await this.countCallsToday()) >= DAILY_LIMIT - SAFETY_MARGIN) break;
+        const ok = await this.fetchAndStoreDetails(match);
+        if (ok) synced++;
       }
 
-      if (!fixtureId) {
-        return { available: false, message: 'Für dieses Spiel wurden noch keine Detaildaten gefunden.' };
+      if (synced > 0 || manual) {
+        this.logger.log(`Match-Details-Sync (${manual ? 'manuell' : 'cron'}): ${synced} Spiele aktualisiert.`);
       }
-
-      // 2. Detaildaten abrufen
-      const details = await this.fetchFixture(fixtureId, apiKey);
-      const ttl = details.status === 'FINISHED' ? this.TTL_FINISHED : this.TTL_OTHER;
-      this.cache.set(matchId, { data: details, expires: Date.now() + ttl });
-      return details;
-    } catch (err: any) {
-      this.logger.error(`Fehler beim Laden der Match-Details: ${err?.message}`);
-      return { available: false, message: 'Detaildaten konnten nicht geladen werden.' };
+      return { synced, skipped: null };
+    } finally {
+      this.syncing = false;
     }
   }
 
-  private headers(apiKey: string) {
-    return { 'x-apisports-key': apiKey };
+  private async findRelevantMatches(): Promise<Match[]> {
+    const now = new Date();
+    const in90min = new Date(now.getTime() + 90 * 60 * 1000);
+
+    return this.prisma.match.findMany({
+      where: {
+        OR: [
+          // laufende Spiele
+          { status: MatchStatus.LIVE },
+          // beendete Spiele, deren Details noch nicht (final) geladen wurden
+          {
+            status: MatchStatus.FINISHED,
+            OR: [
+              { detailsSyncedAt: null },
+              { detailsSyncedAt: { lt: this.prisma.match.fields.updatedAt } },
+            ],
+          },
+          // bald startende Spiele ohne Detaildaten (Aufstellungen)
+          {
+            status: MatchStatus.SCHEDULED,
+            matchDate: { gte: now, lte: in90min },
+            detailsSyncedAt: null,
+          },
+        ],
+      },
+      orderBy: { matchDate: 'asc' },
+    });
+  }
+
+  /** Holt Details für ein Spiel von der API und speichert sie in der DB. */
+  private async fetchAndStoreDetails(match: Match): Promise<boolean> {
+    try {
+      let fixtureId = match.apiFootballId;
+      if (!fixtureId) {
+        fixtureId = await this.resolveFixtureId(match.teamHome, match.teamAway, match.matchDate);
+        if (fixtureId) {
+          await this.prisma.match.update({ where: { id: match.id }, data: { apiFootballId: fixtureId } });
+        }
+      }
+      if (!fixtureId) return false;
+
+      const details = await this.fetchFixture(fixtureId);
+      await this.prisma.match.update({
+        where: { id: match.id },
+        data: {
+          detailsJson: details as any,
+          detailsSyncedAt: new Date(),
+        },
+      });
+      return true;
+    } catch (err: any) {
+      this.logger.error(`Fehler beim Sync von Match ${match.id}: ${err?.message}`);
+      return false;
+    }
+  }
+
+  // ─── API-Football Low-Level (mit Call-Logging) ───
+
+  private isConfigured(): boolean {
+    const key = this.config.get<string>('API_FOOTBALL_KEY');
+    return !!key && key !== 'your_api_football_key';
+  }
+
+  private headers() {
+    return { 'x-apisports-key': this.config.get<string>('API_FOOTBALL_KEY') };
   }
 
   private baseUrl(): string {
     return this.config.get<string>('API_FOOTBALL_BASE_URL', 'https://v3.football.api-sports.io');
   }
 
-  /** Sucht die API-Football Fixture-ID anhand von Datum + Teamnamen. */
+  private async countCallsToday(): Promise<number> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    return this.prisma.apiCallLog.count({ where: { createdAt: { gte: startOfDay } } });
+  }
+
+  /** Zentraler API-Aufruf — protokolliert jeden Call zur Limit-Überwachung. */
+  private async apiGet(endpoint: string, params: Record<string, any>): Promise<any> {
+    let success = false;
+    try {
+      const { data } = await axios.get(`${this.baseUrl()}${endpoint}`, {
+        headers: this.headers(),
+        params,
+      });
+      success = true;
+      return data;
+    } finally {
+      await this.prisma.apiCallLog
+        .create({ data: { provider: 'api-football', endpoint, success } })
+        .catch(() => undefined);
+    }
+  }
+
   private async resolveFixtureId(
     teamHome: string,
     teamAway: string,
     matchDate: Date,
-    apiKey: string,
   ): Promise<number | null> {
     const league = this.config.get<string>('API_FOOTBALL_LEAGUE', '1');
     const season = this.config.get<string>('API_FOOTBALL_SEASON', '2026');
     const dateStr = matchDate.toISOString().slice(0, 10);
 
-    const { data } = await axios.get(`${this.baseUrl()}/fixtures`, {
-      headers: this.headers(apiKey),
-      params: { league, season, date: dateStr },
-    });
-
+    const data = await this.apiGet('/fixtures', { league, season, date: dateStr });
     const fixtures: any[] = data?.response ?? [];
     const nh = this.norm(teamHome);
     const na = this.norm(teamAway);
@@ -157,12 +316,8 @@ export class MatchDetailsService {
     return null;
   }
 
-  private async fetchFixture(fixtureId: number, apiKey: string): Promise<MatchDetails> {
-    const { data } = await axios.get(`${this.baseUrl()}/fixtures`, {
-      headers: this.headers(apiKey),
-      params: { id: fixtureId },
-    });
-
+  private async fetchFixture(fixtureId: number): Promise<MatchDetails> {
+    const data = await this.apiGet('/fixtures', { id: fixtureId });
     const f = data?.response?.[0];
     if (!f) return { available: false, message: 'Keine Detaildaten verfügbar.' };
 
@@ -180,7 +335,7 @@ export class MatchDetailsService {
 
       if (e.type === 'Goal') {
         const detail = e.detail ?? 'Normal Goal';
-        if (detail === 'Missed Penalty') continue; // verschossener Elfer = kein Tor
+        if (detail === 'Missed Penalty') continue;
         goals.push({
           minute, extra, team: side,
           player: e.player?.name ?? 'Unbekannt',
@@ -198,8 +353,8 @@ export class MatchDetailsService {
       } else if (e.type === 'subst') {
         substitutions.push({
           minute, extra, team: side,
-          playerIn: e.assist?.name ?? '—',   // API-Football: assist = eingewechselt
-          playerOut: e.player?.name ?? '—',  // player = ausgewechselt
+          playerIn: e.assist?.name ?? '—',
+          playerOut: e.player?.name ?? '—',
         });
       }
     }
@@ -247,7 +402,6 @@ export class MatchDetailsService {
     };
   }
 
-  /** Normalisiert Teamnamen für den Vergleich (Akzente weg, klein, Sonderzeichen weg). */
   private norm(name: string): string {
     return name
       .normalize('NFD')
@@ -261,7 +415,6 @@ export class MatchDetailsService {
     if (!a || !b) return false;
     if (a === b) return true;
     if (a.includes(b) || b.includes(a)) return true;
-    // Erstes Wort vergleichen (z.B. "korea republic" vs "south korea")
     const fa = a.split(' ')[0];
     const fb = b.split(' ')[0];
     return fa.length > 2 && fa === fb;
