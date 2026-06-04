@@ -205,14 +205,18 @@
   .up-date { font-size: 0.78rem; color: #8b949e; min-width: 100px; }
   .up-match {
     flex: 1;
+    min-width: 0;
     font-size: 0.88rem;
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     .up-flag { width: 20px; height: 15px; object-fit: contain; flex-shrink: 0; }
-    .up-dash { color: #8b949e; }
+    .up-dash { color: #8b949e; flex-shrink: 0; }
   }
   .up-group { font-size: 0.72rem; color: #8b949e; white-space: nowrap; }
 }

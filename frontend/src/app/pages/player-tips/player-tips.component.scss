@@ -121,8 +121,8 @@
   align-items: center;
   gap: 0.4rem;
 
-  &.home { justify-content: flex-start; text-align: left; }
-  &.away { justify-content: flex-end; text-align: right; }
+  &.home { justify-content: flex-end; text-align: right; }
+  &.away { justify-content: flex-start; text-align: left; }
 
   .flag {
     width: 22px;
