@@ -42,7 +42,7 @@ done
 # ── Spieldaten importieren (nur beim Erststart) ──────────────────────────────
 if [ "${SEED:-false}" = "true" ]; then
   log "Importiere WM 2026 Spieldaten..."
-  docker compose exec -T backend npm run prisma:seed-api
+  docker compose exec -T backend npm run prisma:seed-api:prod
 fi
 
 # ── Status ───────────────────────────────────────────────────────────────────

@@ -13,7 +13,10 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:seed-api": "ts-node prisma/seed-from-api.ts",
     "prisma:seed-demo": "ts-node prisma/seed-demo.ts",
-    "prisma:seed-demo:clear": "ts-node prisma/seed-demo-clear.ts"
+    "prisma:seed-demo:clear": "ts-node prisma/seed-demo-clear.ts",
+    "prisma:seed-api:prod": "node dist/prisma/seed-from-api.js",
+    "prisma:seed-demo:prod": "node dist/prisma/seed-demo.js",
+    "prisma:seed-demo:clear:prod": "node dist/prisma/seed-demo-clear.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
