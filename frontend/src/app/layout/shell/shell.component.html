@@ -21,9 +21,9 @@
         <button class="btn-logout" (click)="auth.logout()" title="Abmelden">↪</button>
       </ng-container>
 
-      <a routerLink="/login" class="btn-login" *ngIf="!auth.currentUser() && !auth.isLoading()">
+      <button class="btn-login" (click)="auth.loginWithDiscord()" *ngIf="!auth.currentUser() && !auth.isLoading()">
         Anmelden
-      </a>
+      </button>
     </div>
 
     <button class="hamburger" (click)="menuOpen = !menuOpen">

@@ -89,7 +89,7 @@
       <!-- Nicht eingeloggt, Spiel noch offen -->
       <div class="tip-section guest" *ngIf="!auth.isLoggedIn && match.status === 'SCHEDULED'">
         <p class="tip-guest">
-          <a routerLink="/login">Anmelden</a>, um einen Tipp abzugeben
+          <a class="login-link" (click)="auth.loginWithDiscord()">Anmelden</a>, um einen Tipp abzugeben
         </p>
       </div>
 

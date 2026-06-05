@@ -58,10 +58,12 @@
   padding: 0.35rem 0.9rem;
   background: #5865f2;
   color: #fff;
+  border: none;
   border-radius: 0.5rem;
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 600;
+  cursor: pointer;
   transition: background 0.15s;
 
   &:hover { background: #4752c4; }

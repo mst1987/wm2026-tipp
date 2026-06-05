@@ -23,7 +23,7 @@ export class AuthCallbackComponent implements OnInit {
     if (token) {
       this.auth.handleCallback(token);
     } else {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/']);
     }
   }
 }
