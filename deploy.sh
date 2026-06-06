@@ -23,12 +23,21 @@ fi
 log "Aktualisiere Code..."
 git pull origin main
 
+# ── Aufräumen vor dem Build (Speicher freigeben) ─────────────────────────────
+log "Räume alte Images & Build-Cache auf..."
+docker image prune -f >/dev/null 2>&1 || true
+docker builder prune -f >/dev/null 2>&1 || true
+
 # ── Container bauen & starten ────────────────────────────────────────────────
 log "Baue Container..."
 docker compose build --no-cache
 
 log "Starte Dienste..."
 docker compose up -d
+
+# ── Aufräumen nach dem Build (alte, jetzt ungenutzte Images entfernen) ───────
+log "Entferne ungenutzte Images..."
+docker image prune -f >/dev/null 2>&1 || true
 
 # ── Auf Backend warten ───────────────────────────────────────────────────────
 log "Warte auf Backend..."
