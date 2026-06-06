@@ -1,0 +1,21 @@
+<a class="live-card" [routerLink]="['/matches', match.id]">
+  <div class="live-tag">
+    <span class="live-dot"></span> LIVE
+    <ng-container *ngIf="details?.elapsed">· {{ details?.elapsed }}'</ng-container>
+  </div>
+  <div class="live-teams">
+    <div class="live-team">
+      <img *ngIf="match.teamHomeLogo" [src]="match.teamHomeLogo" [alt]="match.teamHome" class="live-crest" />
+      <span class="live-name">{{ match.teamHome }}</span>
+    </div>
+    <div class="live-score">{{ match.scoreHome ?? 0 }} : {{ match.scoreAway ?? 0 }}</div>
+    <div class="live-team">
+      <span class="live-name">{{ match.teamAway }}</span>
+      <img *ngIf="match.teamAwayLogo" [src]="match.teamAwayLogo" [alt]="match.teamAway" class="live-crest" />
+    </div>
+  </div>
+  <div class="live-lastgoal" *ngIf="lastGoal() as g">
+    ⚽ Letztes Tor: <strong>{{ g.player }}</strong> ({{ goalTeamName(g) }}) {{ minuteLabel(g.minute, g.extra) }}
+    <span *ngIf="g.isPenalty"> · Elfmeter</span><span *ngIf="g.isOwnGoal"> · Eigentor</span>
+  </div>
+</a>

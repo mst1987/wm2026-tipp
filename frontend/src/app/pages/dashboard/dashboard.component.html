@@ -5,13 +5,7 @@
     <div class="trophy">🏆</div>
     <h1>WM 2026 Tippspiel</h1>
 
-    <!-- Gesamtpot, sobald es bezahlte Teilnehmer gibt -->
-    <div class="pot" *ngIf="!loading() && paidCount() > 0">
-      <span class="pot-amount">{{ potTotal }}g</span>
-      <span class="pot-label">Gesamtpot auf Thunderstrike</span>
-      <span class="pot-sub">{{ paidCount() }} Teilnehmer · 🥇 {{ potShare(60) }}g · 🥈 {{ potShare(30) }}g · 🥉 {{ potShare(10) }}g</span>
-    </div>
-    <p *ngIf="!loading() && paidCount() === 0">Tippt die Spiele der WM 2026 und messt euch mit euren Freunden.</p>
+    <app-pot-card *ngIf="!loading()" [paidCount]="paidCount()" />
 
     <div class="hero-actions" *ngIf="!auth.isLoggedIn && !auth.isLoading()">
       <button class="btn-discord" (click)="auth.loginWithDiscord()">
@@ -27,62 +21,9 @@
     </p>
   </section>
 
-  <!-- Spielregeln -->
-  <section class="rules-card">
-    <h2 class="rules-title">📋 Spielregeln</h2>
-    <div class="rules-grid">
-      <div class="rule">
-        <span class="rule-icon">💰</span>
-        <div class="rule-text">
-          <strong>Einsatz: 200g auf Thunderstrike</strong>
-          <small>Pro Teilnehmer, fällig zur Teilnahme</small>
-        </div>
-      </div>
-      <div class="rule">
-        <span class="rule-icon">⏱️</span>
-        <div class="rule-text">
-          <strong>Tipps bis 10 Min. vor Anpfiff</strong>
-          <small>Jederzeit änderbar bis zur Deadline</small>
-        </div>
-      </div>
-      <div class="rule">
-        <span class="rule-icon">🚪</span>
-        <div class="rule-text">
-          <strong>Jederzeit einsteigen</strong>
-          <small>Mitmachen ist auch während des Turniers möglich</small>
-        </div>
-      </div>
-      <div class="rule">
-        <span class="rule-icon">🏆</span>
-        <div class="rule-text">
-          <strong>Gewinnverteilung</strong>
-          <small>Platz 1: 60 % · Platz 2: 30 % · Platz 3: 10 % des Pots</small>
-        </div>
-      </div>
-    </div>
-  </section>
+  <app-rules-card />
 
-  <!-- Live-Spiel -->
-  <a class="live-card" *ngIf="liveMatch() as lm" [routerLink]="['/matches', lm.id]">
-    <div class="live-tag"><span class="live-dot"></span> LIVE
-      <ng-container *ngIf="liveDetails()?.elapsed">· {{ liveDetails()?.elapsed }}'</ng-container>
-    </div>
-    <div class="live-teams">
-      <div class="live-team">
-        <img *ngIf="lm.teamHomeLogo" [src]="lm.teamHomeLogo" [alt]="lm.teamHome" class="live-crest" />
-        <span class="live-name">{{ lm.teamHome }}</span>
-      </div>
-      <div class="live-score">{{ lm.scoreHome ?? 0 }} : {{ lm.scoreAway ?? 0 }}</div>
-      <div class="live-team">
-        <span class="live-name">{{ lm.teamAway }}</span>
-        <img *ngIf="lm.teamAwayLogo" [src]="lm.teamAwayLogo" [alt]="lm.teamAway" class="live-crest" />
-      </div>
-    </div>
-    <div class="live-lastgoal" *ngIf="lastGoal() as g">
-      ⚽ Letztes Tor: <strong>{{ g.player }}</strong> ({{ goalTeamName(g) }}) {{ minuteLabel(g.minute, g.extra) }}
-      <span *ngIf="g.isPenalty"> · Elfmeter</span><span *ngIf="g.isOwnGoal"> · Eigentor</span>
-    </div>
-  </a>
+  <app-live-match-card *ngIf="liveMatch() as lm" [match]="lm" [details]="liveDetails()" />
 
   <!-- Hinweis: offene Tipps -->
   <a routerLink="/matches" class="tip-reminder" *ngIf="auth.isLoggedIn && !loading() && untippedCount() > 0">
@@ -120,79 +61,11 @@
   </div>
 
   <div class="grid" *ngIf="!loading()">
-
-    <!-- Top 5 -->
-    <section class="card">
-      <h3 class="card-title">🏆 Top 5</h3>
-      <div class="top5-empty" *ngIf="top5().length === 0">
-        Noch keine Tipps abgegeben.
-      </div>
-      <div class="top5-list">
-        <div *ngFor="let s of top5()" class="top5-row" [class.gold]="s.rank === 1" [class.me]="auth.currentUser()?.id === s.id">
-          <span class="medal">{{ rankMedal(s.rank) }}</span>
-          <img [src]="avatarUrl(s)" [alt]="s.username" class="avatar" />
-          <span class="name">
-            {{ s.username }}
-            <span class="you" *ngIf="auth.currentUser()?.id === s.id">(Du)</span>
-          </span>
-          <span class="pts">{{ s.totalPoints }} Pkt</span>
-        </div>
-      </div>
-      <a routerLink="/standings" class="card-link">Vollständige Rangliste →</a>
-    </section>
-
-    <!-- Nächste Spiele -->
-    <section class="card">
-      <h3 class="card-title">📅 Nächste Spiele</h3>
-      <div class="upcoming-empty" *ngIf="upcoming().length === 0">
-        Keine anstehenden Spiele.
-      </div>
-      <div class="upcoming-list">
-        <a *ngFor="let m of upcoming()" class="upcoming-row" [attr.data-group]="normalizeGroup(m.group)"
-           [routerLink]="['/matches', m.id]">
-          <span class="up-date">{{ formatDate(m.matchDate) }}</span>
-          <span class="up-match">
-            <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="up-flag" />
-            {{ m.teamHome }}
-            <span class="up-dash">–</span>
-            {{ m.teamAway }}
-            <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="up-flag" />
-          </span>
-          <span class="up-group" *ngIf="m.group">Gr. {{ normalizeGroup(m.group) }}</span>
-        </a>
-      </div>
-      <a routerLink="/matches" class="card-link">Alle Spiele →</a>
-    </section>
-
+    <app-leaderboard-preview [entries]="top5()" [currentUserId]="auth.currentUser()?.id ?? null" />
+    <app-upcoming-matches [matches]="upcoming()" />
   </div>
 
-  <!-- Torschützen & Scorer -->
-  <section class="card scorers-card" *ngIf="!loading() && scorers().length > 0">
-    <h3 class="card-title">👟 Torschützen & Scorer</h3>
-    <table class="scorers-table">
-      <thead>
-        <tr>
-          <th class="c-rank">#</th>
-          <th class="c-player">Spieler</th>
-          <th class="c-num" title="Tore">⚽</th>
-          <th class="c-num" title="Vorlagen">🅰️</th>
-          <th class="c-num" title="Scorerpunkte (Tore + Vorlagen)">Σ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let s of scorers(); let i = index">
-          <td class="c-rank">{{ i + 1 }}</td>
-          <td class="c-player">
-            <span class="sc-name">{{ s.player }}</span>
-            <span class="sc-team" *ngIf="s.team">{{ s.team }}</span>
-          </td>
-          <td class="c-num">{{ s.goals }}</td>
-          <td class="c-num">{{ s.assists }}</td>
-          <td class="c-num c-total">{{ s.points }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+  <app-top-scorers *ngIf="!loading() && scorers().length > 0" [scorers]="scorers()" />
 
   <div class="loading" *ngIf="loading()">Lade Daten...</div>
 </div>

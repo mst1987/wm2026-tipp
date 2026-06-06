@@ -1,0 +1,18 @@
+<section class="card">
+  <h3 class="card-title">🏆 Top 5</h3>
+  <div class="top5-empty" *ngIf="entries.length === 0">
+    Noch keine Tipps abgegeben.
+  </div>
+  <div class="top5-list">
+    <div *ngFor="let s of entries" class="top5-row" [class.gold]="s.rank === 1" [class.me]="currentUserId === s.id">
+      <span class="medal">{{ rankMedal(s.rank) }}</span>
+      <img [src]="avatarUrl(s)" [alt]="s.username" class="avatar" />
+      <span class="name">
+        {{ s.username }}
+        <span class="you" *ngIf="currentUserId === s.id">(Du)</span>
+      </span>
+      <span class="pts">{{ s.totalPoints }} Pkt</span>
+    </div>
+  </div>
+  <a routerLink="/standings" class="card-link">Vollständige Rangliste →</a>
+</section>

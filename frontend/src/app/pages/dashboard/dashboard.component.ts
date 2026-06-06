@@ -6,14 +6,27 @@ import { AuthService } from '../../core/auth.service';
 import { Match, MatchesService, ScorerEntry } from '../../core/matches.service';
 import { Standing, StandingsService } from '../../core/standings.service';
 import { Tip, TipsService } from '../../core/tips.service';
-import { GoalEvent, MatchDetails, MatchDetailsService } from '../../core/match-details.service';
-
-const STAKE_PER_PLAYER = 200; // g auf Thunderstrike
+import { MatchDetails, MatchDetailsService } from '../../core/match-details.service';
+import { PotCardComponent } from './components/pot-card/pot-card.component';
+import { RulesCardComponent } from './components/rules-card/rules-card.component';
+import { LiveMatchCardComponent } from './components/live-match-card/live-match-card.component';
+import { TopScorersComponent } from './components/top-scorers/top-scorers.component';
+import { LeaderboardPreviewComponent } from './components/leaderboard-preview/leaderboard-preview.component';
+import { UpcomingMatchesComponent } from './components/upcoming-matches/upcoming-matches.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    PotCardComponent,
+    RulesCardComponent,
+    LiveMatchCardComponent,
+    TopScorersComponent,
+    LeaderboardPreviewComponent,
+    UpcomingMatchesComponent,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -51,7 +64,6 @@ export class DashboardComponent implements OnInit {
         this.untippedCount.set(this.countUntipped(allMatches, tips));
         this.scorers.set(scorers.slice(0, 10));
 
-        // Aktuell laufendes Spiel + dessen Details (letztes Tor)
         const live = matches.find((m) => m.status === 'LIVE');
         if (live) {
           this.liveMatch.set(live);
@@ -65,30 +77,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  get potTotal(): number {
-    return this.paidCount() * STAKE_PER_PLAYER;
-  }
-
-  potShare(percent: number): number {
-    return Math.round((this.potTotal * percent) / 100);
-  }
-
-  /** Letztes Tor des laufenden Spiels (höchste Minute). */
-  lastGoal(): GoalEvent | null {
-    const goals = this.liveDetails()?.goals;
-    if (!goals?.length) return null;
-    return [...goals].sort((a, b) => (b.minute - a.minute) || (b.extra ?? 0) - (a.extra ?? 0))[0];
-  }
-
-  goalTeamName(g: GoalEvent): string {
-    const d = this.liveDetails();
-    return g.team === 'home' ? d?.homeTeam?.name ?? '' : d?.awayTeam?.name ?? '';
-  }
-
-  minuteLabel(minute: number, extra: number | null): string {
-    return extra ? `${minute}+${extra}'` : `${minute}'`;
-  }
-
   /** Zählt tippbare Spiele (offen, Deadline noch nicht erreicht) ohne abgegebenen Tipp. */
   private countUntipped(matches: Match[], tips: Tip[]): number {
     const tipped = new Set(tips.map((t) => t.matchId));
@@ -98,28 +86,5 @@ export class DashboardComponent implements OnInit {
       const deadline = new Date(m.matchDate).getTime() - 10 * 60 * 1000;
       return now < deadline && !tipped.has(m.id);
     }).length;
-  }
-
-  rankMedal(rank: number): string {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return `${rank}.`;
-  }
-
-  avatarUrl(s: Standing): string {
-    if (s.avatar) return `https://cdn.discordapp.com/avatars/${s.discordId}/${s.avatar}.png`;
-    return `https://cdn.discordapp.com/embed/avatars/0.png`;
-  }
-
-  formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleString('de-DE', {
-      weekday: 'short', day: '2-digit', month: '2-digit',
-      hour: '2-digit', minute: '2-digit',
-    });
-  }
-
-  normalizeGroup(group: string | null): string {
-    return group ? group.replace('GROUP_', '') : '';
   }
 }

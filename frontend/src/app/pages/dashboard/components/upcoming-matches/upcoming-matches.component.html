@@ -1,0 +1,21 @@
+<section class="card">
+  <h3 class="card-title">📅 Nächste Spiele</h3>
+  <div class="upcoming-empty" *ngIf="matches.length === 0">
+    Keine anstehenden Spiele.
+  </div>
+  <div class="upcoming-list">
+    <a *ngFor="let m of matches" class="upcoming-row" [attr.data-group]="normalizeGroup(m.group)"
+       [routerLink]="['/matches', m.id]">
+      <span class="up-date">{{ formatDate(m.matchDate) }}</span>
+      <span class="up-match">
+        <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="up-flag" />
+        {{ m.teamHome }}
+        <span class="up-dash">–</span>
+        {{ m.teamAway }}
+        <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="up-flag" />
+      </span>
+      <span class="up-group" *ngIf="m.group">Gr. {{ normalizeGroup(m.group) }}</span>
+    </a>
+  </div>
+  <a routerLink="/matches" class="card-link">Alle Spiele →</a>
+</section>

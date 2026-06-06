@@ -1,0 +1,6 @@
+<div class="pot" *ngIf="paidCount > 0">
+  <span class="pot-amount">{{ potTotal }}g</span>
+  <span class="pot-label">Gesamtpot auf Thunderstrike</span>
+  <span class="pot-sub">{{ paidCount }} Teilnehmer · 🥇 {{ potShare(60) }}g · 🥈 {{ potShare(30) }}g · 🥉 {{ potShare(10) }}g</span>
+</div>
+<p class="pot-intro" *ngIf="paidCount === 0">Tippt die Spiele der WM 2026 und messt euch mit euren Freunden.</p>

@@ -1,0 +1,60 @@
+.live-card {
+  display: block;
+  background: linear-gradient(135deg, rgba(63, 185, 80, 0.1), #161b22);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  border-radius: 1rem;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.1s;
+
+  &:hover { border-color: #3fb950; transform: translateY(-1px); }
+}
+
+.live-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #3fb950;
+  margin-bottom: 0.6rem;
+
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #3fb950; animation: blink 1.2s infinite;
+  }
+}
+
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.live-teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+
+  .live-team {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+
+    &:first-child { justify-content: flex-end; }
+    .live-crest { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+    .live-name { font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+
+  .live-score { font-size: 1.8rem; font-weight: 800; color: #3fb950; white-space: nowrap; }
+}
+
+.live-lastgoal {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(63, 185, 80, 0.2);
+  font-size: 0.82rem;
+  color: #8b949e;
+  text-align: center;
+  strong { color: #c9d1d9; }
+}
