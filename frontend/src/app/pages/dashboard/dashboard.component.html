@@ -4,7 +4,7 @@
   <section class="hero">
     <div class="trophy">🏆</div>
     <h1>WM 2026 Tippspiel</h1>
-    <p>Meldet euch gerne für das Tippspiel zur WM an.<br>Einsatz sind <strong>200g</strong> auf Thunderstrike.</p>
+    <p>Tippt die Spiele der WM 2026 und messt euch mit euren Freunden.</p>
 
     <div class="hero-actions" *ngIf="!auth.isLoggedIn && !auth.isLoading()">
       <button class="btn-discord" (click)="auth.loginWithDiscord()">
@@ -18,6 +18,41 @@
     <p class="welcome" *ngIf="auth.currentUser() as user">
       Willkommen zurück, <strong>{{ user.username }}</strong>! 👋
     </p>
+  </section>
+
+  <!-- Spielregeln -->
+  <section class="rules-card">
+    <h2 class="rules-title">📋 Spielregeln</h2>
+    <div class="rules-grid">
+      <div class="rule">
+        <span class="rule-icon">💰</span>
+        <div class="rule-text">
+          <strong>Einsatz: 200g auf Thunderstrike</strong>
+          <small>Pro Teilnehmer, fällig zur Teilnahme</small>
+        </div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">⏱️</span>
+        <div class="rule-text">
+          <strong>Tipps bis 10 Min. vor Anpfiff</strong>
+          <small>Jederzeit änderbar bis zur Deadline</small>
+        </div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">🚪</span>
+        <div class="rule-text">
+          <strong>Jederzeit einsteigen</strong>
+          <small>Mitmachen ist auch während des Turniers möglich</small>
+        </div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">🏆</span>
+        <div class="rule-text">
+          <strong>Gewinnverteilung</strong>
+          <small>Platz 1: 60 % · Platz 2: 30 % · Platz 3: 10 % des Pots</small>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Hinweis: offene Tipps -->

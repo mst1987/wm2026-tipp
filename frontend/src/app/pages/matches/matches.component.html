@@ -125,4 +125,23 @@
 
     <div class="empty" *ngIf="filteredMatches.length === 0">Keine Spiele gefunden.</div>
   </div>
+
+  <!-- Einsatz-Bestätigung vor dem ersten Tipp -->
+  <div class="modal-overlay" *ngIf="showStakeModal()" (click)="cancelStake()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-icon">🏆</div>
+      <h3>Einsatz bestätigen</h3>
+      <p>
+        Mit deinem ersten Tipp nimmst du verbindlich am Tippspiel teil.
+        Der Einsatz beträgt <strong>200g auf Thunderstrike</strong>.
+      </p>
+      <p class="modal-hint">
+        Platz 1 erhält 60 %, Platz 2 30 % und Platz 3 10 % des Gesamtpots.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelStake()">Abbrechen</button>
+        <button class="btn-confirm" (click)="confirmStake()">Ja, 200g einsetzen</button>
+      </div>
+    </div>
+  </div>
 </div>

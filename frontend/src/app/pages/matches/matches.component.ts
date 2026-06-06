@@ -35,6 +35,12 @@ export class MatchesComponent implements OnInit {
   loading = signal(true);
   activeGroup = signal<string>('all');
 
+  // Einsatz-Bestätigung vor dem ersten Tipp
+  private readonly STAKE_KEY = 'wm2026_stake_accepted';
+  stakeAccepted = signal<boolean>(localStorage.getItem('wm2026_stake_accepted') === '1');
+  showStakeModal = signal(false);
+  private pendingMatch = signal<Match | null>(null);
+
   constructor(
     private matchesService: MatchesService,
     private tipsService: TipsService,
@@ -118,6 +124,33 @@ export class MatchesComponent implements OnInit {
   }
 
   saveTip(match: Match) {
+    const form = this.forms().get(match.id);
+    if (!form || form.home === null || form.away === null) return;
+
+    // Vor dem allerersten Tipp den 200g-Einsatz bestätigen lassen
+    if (!this.stakeAccepted()) {
+      this.pendingMatch.set(match);
+      this.showStakeModal.set(true);
+      return;
+    }
+    this.doSaveTip(match);
+  }
+
+  confirmStake() {
+    localStorage.setItem(this.STAKE_KEY, '1');
+    this.stakeAccepted.set(true);
+    this.showStakeModal.set(false);
+    const m = this.pendingMatch();
+    this.pendingMatch.set(null);
+    if (m) this.doSaveTip(m);
+  }
+
+  cancelStake() {
+    this.showStakeModal.set(false);
+    this.pendingMatch.set(null);
+  }
+
+  private doSaveTip(match: Match) {
     const formMap = new Map(this.forms());
     const form = formMap.get(match.id)!;
     if (form.home === null || form.away === null) return;

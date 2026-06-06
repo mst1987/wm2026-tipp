@@ -266,3 +266,77 @@
 }
 
 .empty { text-align: center; color: #8b949e; padding: 3rem; }
+
+/* Einsatz-Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-top: 4px solid #f0c040;
+  border-radius: 1rem;
+  padding: 1.75rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  animation: popIn 0.18s ease;
+
+  .modal-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+  h3 { margin: 0 0 0.75rem; font-size: 1.25rem; font-weight: 700; }
+
+  p {
+    margin: 0 0 0.6rem;
+    font-size: 0.92rem;
+    color: #c9d1d9;
+    line-height: 1.5;
+    strong { color: #f0c040; }
+  }
+
+  .modal-hint { font-size: 0.82rem; color: #8b949e; }
+}
+
+@keyframes popIn { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+
+  button {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn-cancel {
+    background: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    &:hover { background: #30363d; }
+  }
+
+  .btn-confirm {
+    background: #f0c040;
+    color: #161b22;
+    border: 1px solid #f0c040;
+    &:hover { background: #f5cf5e; }
+  }
+}
