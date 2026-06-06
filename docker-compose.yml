@@ -6,9 +6,9 @@ services:
       POSTGRES_USER:     ${POSTGRES_USER:-wm2026}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wm2026}
       POSTGRES_DB:       ${POSTGRES_DB:-wm2026}
-    # Nur an localhost gebunden: lokal erreichbar, aber nicht von außen offen
-    ports:
-      - '127.0.0.1:5432:5432'
+    # Kein Host-Port hier: auf dem Server verbindet sich das Backend intern
+    # über das Docker-Netz (postgres:5432). Für lokale Entwicklung fügt
+    # docker-compose.override.yml den Host-Port 5432 hinzu.
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

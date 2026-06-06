@@ -11,6 +11,9 @@ build/
 .env.*.local
 # .env.example ist OK und soll getrackt werden
 
+# Lokale Docker-Overrides (nur für lokale Entwicklung, nicht für den Server)
+docker-compose.override.yml
+
 # Logs
 *.log
 npm-debug.log*
