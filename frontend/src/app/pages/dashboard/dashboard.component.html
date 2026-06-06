@@ -4,7 +4,14 @@
   <section class="hero">
     <div class="trophy">🏆</div>
     <h1>WM 2026 Tippspiel</h1>
-    <p>Tippt die Spiele der WM 2026 und messt euch mit euren Freunden.</p>
+
+    <!-- Gesamtpot, sobald es bezahlte Teilnehmer gibt -->
+    <div class="pot" *ngIf="!loading() && paidCount() > 0">
+      <span class="pot-amount">{{ potTotal }}g</span>
+      <span class="pot-label">Gesamtpot auf Thunderstrike</span>
+      <span class="pot-sub">{{ paidCount() }} Teilnehmer · 🥇 {{ potShare(60) }}g · 🥈 {{ potShare(30) }}g · 🥉 {{ potShare(10) }}g</span>
+    </div>
+    <p *ngIf="!loading() && paidCount() === 0">Tippt die Spiele der WM 2026 und messt euch mit euren Freunden.</p>
 
     <div class="hero-actions" *ngIf="!auth.isLoggedIn && !auth.isLoading()">
       <button class="btn-discord" (click)="auth.loginWithDiscord()">
@@ -54,6 +61,28 @@
       </div>
     </div>
   </section>
+
+  <!-- Live-Spiel -->
+  <a class="live-card" *ngIf="liveMatch() as lm" [routerLink]="['/matches', lm.id]">
+    <div class="live-tag"><span class="live-dot"></span> LIVE
+      <ng-container *ngIf="liveDetails()?.elapsed">· {{ liveDetails()?.elapsed }}'</ng-container>
+    </div>
+    <div class="live-teams">
+      <div class="live-team">
+        <img *ngIf="lm.teamHomeLogo" [src]="lm.teamHomeLogo" [alt]="lm.teamHome" class="live-crest" />
+        <span class="live-name">{{ lm.teamHome }}</span>
+      </div>
+      <div class="live-score">{{ lm.scoreHome ?? 0 }} : {{ lm.scoreAway ?? 0 }}</div>
+      <div class="live-team">
+        <span class="live-name">{{ lm.teamAway }}</span>
+        <img *ngIf="lm.teamAwayLogo" [src]="lm.teamAwayLogo" [alt]="lm.teamAway" class="live-crest" />
+      </div>
+    </div>
+    <div class="live-lastgoal" *ngIf="lastGoal() as g">
+      ⚽ Letztes Tor: <strong>{{ g.player }}</strong> ({{ goalTeamName(g) }}) {{ minuteLabel(g.minute, g.extra) }}
+      <span *ngIf="g.isPenalty"> · Elfmeter</span><span *ngIf="g.isOwnGoal"> · Eigentor</span>
+    </div>
+  </a>
 
   <!-- Hinweis: offene Tipps -->
   <a routerLink="/matches" class="tip-reminder" *ngIf="auth.isLoggedIn && !loading() && untippedCount() > 0">
@@ -136,6 +165,34 @@
     </section>
 
   </div>
+
+  <!-- Torschützen & Scorer -->
+  <section class="card scorers-card" *ngIf="!loading() && scorers().length > 0">
+    <h3 class="card-title">👟 Torschützen & Scorer</h3>
+    <table class="scorers-table">
+      <thead>
+        <tr>
+          <th class="c-rank">#</th>
+          <th class="c-player">Spieler</th>
+          <th class="c-num" title="Tore">⚽</th>
+          <th class="c-num" title="Vorlagen">🅰️</th>
+          <th class="c-num" title="Scorerpunkte (Tore + Vorlagen)">Σ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of scorers(); let i = index">
+          <td class="c-rank">{{ i + 1 }}</td>
+          <td class="c-player">
+            <span class="sc-name">{{ s.player }}</span>
+            <span class="sc-team" *ngIf="s.team">{{ s.team }}</span>
+          </td>
+          <td class="c-num">{{ s.goals }}</td>
+          <td class="c-num">{{ s.assists }}</td>
+          <td class="c-num c-total">{{ s.points }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
   <div class="loading" *ngIf="loading()">Lade Daten...</div>
 </div>

@@ -21,6 +21,11 @@ export class MatchesController {
     return this.matchesService.findUpcoming();
   }
 
+  @Get('scorers')
+  getScorers() {
+    return this.matchDetailsService.getTopScorers();
+  }
+
   @Get(':id/details')
   getDetails(@Param('id') id: string) {
     return this.matchDetailsService.getDetails(id);

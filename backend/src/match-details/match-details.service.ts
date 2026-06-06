@@ -69,6 +69,14 @@ export interface MatchDetails {
   lineups?: { home: TeamLineup | null; away: TeamLineup | null };
 }
 
+export interface ScorerEntry {
+  player: string;
+  team: string | null;
+  goals: number;
+  assists: number;
+  points: number; // Tore + Vorlagen (für Sortierung/Scorer-Wertung)
+}
+
 export interface ApiStatus {
   configured: boolean;
   lastCallAt: string | null;
@@ -113,6 +121,44 @@ export class MatchDetailsService {
       message: 'Für dieses Spiel wurden noch keine Detaildaten synchronisiert.',
       syncedAt: null,
     };
+  }
+
+  /** Aggregiert Tore & Vorlagen aller synchronisierten Spiele (turnierweite Scorer-Liste). */
+  async getTopScorers(): Promise<ScorerEntry[]> {
+    const matches = await this.prisma.match.findMany({
+      select: { detailsJson: true },
+    });
+
+    const map = new Map<string, ScorerEntry>();
+    const ensure = (player: string, team: string | null): ScorerEntry => {
+      let e = map.get(player);
+      if (!e) {
+        e = { player, team, goals: 0, assists: 0, points: 0 };
+        map.set(player, e);
+      } else if (!e.team && team) {
+        e.team = team;
+      }
+      return e;
+    };
+
+    for (const m of matches) {
+      const d = m.detailsJson as unknown as MatchDetails;
+      if (!d?.goals?.length) continue;
+      for (const g of d.goals) {
+        const teamName = g.team === 'home' ? d.homeTeam?.name ?? null : d.awayTeam?.name ?? null;
+        // Eigentore zählen nicht als Tor des Schützen
+        if (!g.isOwnGoal && g.player) {
+          ensure(g.player, teamName).goals++;
+        }
+        if (g.assist) {
+          ensure(g.assist, teamName).assists++;
+        }
+      }
+    }
+
+    return Array.from(map.values())
+      .map((e) => ({ ...e, points: e.goals + e.assists }))
+      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.player.localeCompare(b.player));
   }
 
   // ─── Admin: Status & manueller Sync ───

@@ -17,6 +17,14 @@ export interface Match {
   group: string | null;
 }
 
+export interface ScorerEntry {
+  player: string;
+  team: string | null;
+  goals: number;
+  assists: number;
+  points: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MatchesService {
   private base = `${environment.apiUrl}/matches`;
@@ -29,5 +37,9 @@ export class MatchesService {
 
   getUpcoming() {
     return this.http.get<Match[]>(`${this.base}/upcoming`);
+  }
+
+  getScorers() {
+    return this.http.get<ScorerEntry[]>(`${this.base}/scorers`);
   }
 }

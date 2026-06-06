@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
-import { Match, MatchesService } from '../../core/matches.service';
+import { Match, MatchesService, ScorerEntry } from '../../core/matches.service';
 import { Standing, StandingsService } from '../../core/standings.service';
 import { Tip, TipsService } from '../../core/tips.service';
+import { GoalEvent, MatchDetails, MatchDetailsService } from '../../core/match-details.service';
+
+const STAKE_PER_PLAYER = 200; // g auf Thunderstrike
 
 @Component({
   selector: 'app-dashboard',
@@ -20,11 +23,17 @@ export class DashboardComponent implements OnInit {
   untippedCount = signal(0);
   loading = signal(true);
 
+  paidCount = signal(0);
+  scorers = signal<ScorerEntry[]>([]);
+  liveMatch = signal<Match | null>(null);
+  liveDetails = signal<MatchDetails | null>(null);
+
   constructor(
     public auth: AuthService,
     private matchesService: MatchesService,
     private standingsService: StandingsService,
     private tipsService: TipsService,
+    private matchDetailsService: MatchDetailsService,
   ) {}
 
   ngOnInit() {
@@ -33,15 +42,51 @@ export class DashboardComponent implements OnInit {
       matches: this.matchesService.getUpcoming(),
       allMatches: this.auth.isLoggedIn ? this.matchesService.getAll() : of([] as Match[]),
       tips: this.auth.isLoggedIn ? this.tipsService.getMyTips() : of([] as Tip[]),
+      scorers: this.matchesService.getScorers(),
     }).subscribe({
-      next: ({ standings, matches, allMatches, tips }) => {
+      next: ({ standings, matches, allMatches, tips, scorers }) => {
         this.top5.set(standings.ranked.slice(0, 5));
-        this.upcoming.set(matches.slice(0, 5));
+        this.paidCount.set(standings.ranked.length);
+        this.upcoming.set(matches.filter((m) => m.status !== 'LIVE').slice(0, 5));
         this.untippedCount.set(this.countUntipped(allMatches, tips));
+        this.scorers.set(scorers.slice(0, 10));
+
+        // Aktuell laufendes Spiel + dessen Details (letztes Tor)
+        const live = matches.find((m) => m.status === 'LIVE');
+        if (live) {
+          this.liveMatch.set(live);
+          this.matchDetailsService.getDetails(live.id).subscribe({
+            next: (d) => this.liveDetails.set(d),
+          });
+        }
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  get potTotal(): number {
+    return this.paidCount() * STAKE_PER_PLAYER;
+  }
+
+  potShare(percent: number): number {
+    return Math.round((this.potTotal * percent) / 100);
+  }
+
+  /** Letztes Tor des laufenden Spiels (höchste Minute). */
+  lastGoal(): GoalEvent | null {
+    const goals = this.liveDetails()?.goals;
+    if (!goals?.length) return null;
+    return [...goals].sort((a, b) => (b.minute - a.minute) || (b.extra ?? 0) - (a.extra ?? 0))[0];
+  }
+
+  goalTeamName(g: GoalEvent): string {
+    const d = this.liveDetails();
+    return g.team === 'home' ? d?.homeTeam?.name ?? '' : d?.awayTeam?.name ?? '';
+  }
+
+  minuteLabel(minute: number, extra: number | null): string {
+    return extra ? `${minute}+${extra}'` : `${minute}'`;
   }
 
   /** Zählt tippbare Spiele (offen, Deadline noch nicht erreicht) ohne abgegebenen Tipp. */
