@@ -40,8 +40,11 @@ export class MatchesService {
         scoreHome: data.scoreHome,
         scoreAway: data.scoreAway,
         status: data.status,
+        teamHome: data.teamHome,
+        teamAway: data.teamAway,
         teamHomeLogo: data.teamHomeLogo,
         teamAwayLogo: data.teamAwayLogo,
+        matchDate: data.matchDate,
       },
       create: data,
     });

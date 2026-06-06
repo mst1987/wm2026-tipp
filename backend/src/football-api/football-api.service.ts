@@ -57,8 +57,8 @@ export class FootballApiService {
     return {
       externalId: m.id as number,
       matchDate: new Date(m.utcDate),
-      teamHome: m.homeTeam.name as string,
-      teamAway: m.awayTeam.name as string,
+      teamHome: (m.homeTeam.name as string) || 'TBD',
+      teamAway: (m.awayTeam.name as string) || 'TBD',
       teamHomeLogo: m.homeTeam.crest as string | undefined,
       teamAwayLogo: m.awayTeam.crest as string | undefined,
       scoreHome: m.score?.fullTime?.home ?? null,
