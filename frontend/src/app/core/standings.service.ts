@@ -14,11 +14,16 @@ export interface Standing {
   awardedTips: number;
 }
 
+export interface Leaderboard {
+  ranked: Standing[];
+  unpaid: Standing[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class StandingsService {
   constructor(private http: HttpClient) {}
 
   getLeaderboard() {
-    return this.http.get<Standing[]>(`${environment.apiUrl}/standings`);
+    return this.http.get<Leaderboard>(`${environment.apiUrl}/standings`);
   }
 }

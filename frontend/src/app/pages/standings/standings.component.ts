@@ -13,6 +13,7 @@ import { AuthService } from '../../core/auth.service';
 })
 export class StandingsComponent implements OnInit {
   standings = signal<Standing[]>([]);
+  unpaid = signal<Standing[]>([]);
   loading = signal(true);
 
   constructor(
@@ -23,7 +24,11 @@ export class StandingsComponent implements OnInit {
 
   ngOnInit() {
     this.standingsService.getLeaderboard().subscribe({
-      next: (data) => { this.standings.set(data); this.loading.set(false); },
+      next: (data) => {
+        this.standings.set(data.ranked);
+        this.unpaid.set(data.unpaid);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }

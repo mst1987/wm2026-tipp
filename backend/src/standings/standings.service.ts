@@ -12,7 +12,7 @@ export class StandingsService {
       },
     });
 
-    return users
+    const sorted = users
       .map((user) => ({
         id: user.id,
         discordId: user.discordId,
@@ -23,7 +23,18 @@ export class StandingsService {
         tipsCount: user.tips.length,
         awardedTips: user.tips.filter((t) => t.pointsAwarded).length,
       }))
-      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .sort((a, b) => b.totalPoints - a.totalPoints);
+
+    // Ränge nur unter bezahlten Teilnehmern vergeben
+    const ranked = sorted
+      .filter((u) => u.hasPaid)
       .map((entry, index) => ({ ...entry, rank: index + 1 }));
+
+    // Unbezahlte ohne Rang, ebenfalls nach Punkten sortiert
+    const unpaid = sorted
+      .filter((u) => !u.hasPaid)
+      .map((entry) => ({ ...entry, rank: 0 }));
+
+    return { ranked, unpaid };
   }
 }

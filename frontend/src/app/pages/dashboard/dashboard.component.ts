@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
       tips: this.auth.isLoggedIn ? this.tipsService.getMyTips() : of([] as Tip[]),
     }).subscribe({
       next: ({ standings, matches, allMatches, tips }) => {
-        this.top5.set(standings.slice(0, 5));
+        this.top5.set(standings.ranked.slice(0, 5));
         this.upcoming.set(matches.slice(0, 5));
         this.untippedCount.set(this.countUntipped(allMatches, tips));
         this.loading.set(false);

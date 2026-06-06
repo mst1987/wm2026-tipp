@@ -28,7 +28,37 @@
     </div>
 
     <div class="empty" *ngIf="standings().length === 0">
-      Noch keine Tipps abgegeben.
+      Noch keine bezahlten Teilnehmer in der Rangliste.
+    </div>
+  </div>
+
+  <!-- Noch nicht bezahlt -->
+  <div class="pending-section" *ngIf="!loading() && unpaid().length > 0">
+    <div class="pending-header">
+      <h3>Ausstehende Zahlung</h3>
+      <p class="pending-info">
+        Diese Teilnehmer erscheinen erst in der Rangliste, sobald der Einsatz (200g auf Thunderstrike) bezahlt wurde.
+      </p>
+    </div>
+
+    <div class="pending-list">
+      <div
+        *ngFor="let entry of unpaid()"
+        class="pending-row"
+        [class.me]="auth.currentUser()?.id === entry.id"
+        (click)="openPlayer(entry)"
+        title="Tipps von {{ entry.username }} anzeigen"
+      >
+        <img [src]="avatarUrl(entry)" [alt]="entry.username" class="avatar" />
+        <span class="username">
+          {{ entry.username }}
+          <span class="you" *ngIf="auth.currentUser()?.id === entry.id">(Du)</span>
+        </span>
+        <span class="stats">{{ entry.awardedTips }}/{{ entry.tipsCount }} Tipps</span>
+        <span class="payment-badge" title="Einsatz ausstehend">$</span>
+        <span class="points">{{ entry.totalPoints }} Pkt</span>
+        <span class="arrow">›</span>
+      </div>
     </div>
   </div>
 </div>

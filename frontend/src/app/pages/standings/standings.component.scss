@@ -105,3 +105,102 @@
 }
 
 .empty { text-align: center; color: #8b949e; padding: 3rem; }
+
+/* Ausstehende Zahlung */
+.pending-section {
+  margin-top: 2rem;
+}
+
+.pending-header {
+  margin-bottom: 0.85rem;
+
+  h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #c9d1d9;
+  }
+
+  .pending-info {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #8b949e;
+    line-height: 1.4;
+  }
+}
+
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pending-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  background: #161b22;
+  border: 1px dashed #30363d;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+
+  &:hover {
+    border-color: #58a6ff;
+    background: rgba(88, 166, 255, 0.05);
+    opacity: 1;
+    .arrow { opacity: 1; }
+  }
+
+  &.me {
+    border-color: rgba(240, 192, 64, 0.5);
+    background: rgba(240, 192, 64, 0.04);
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .username {
+    flex: 1;
+    font-weight: 600;
+    font-size: 1rem;
+
+    .you {
+      font-size: 0.78rem;
+      color: #f0c040;
+      font-weight: 400;
+      margin-left: 0.3rem;
+    }
+  }
+
+  .stats { font-size: 0.82rem; color: #8b949e; }
+
+  .payment-badge {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #f85149;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  .points {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #8b949e;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .arrow {
+    font-size: 1.2rem;
+    color: #8b949e;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+}
