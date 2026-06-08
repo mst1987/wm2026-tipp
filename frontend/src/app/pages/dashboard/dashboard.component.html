@@ -1,7 +1,13 @@
 <div class="dashboard">
 
-  <!-- Hero -->
-  <section class="hero">
+  <!-- Willkommen (eigener Container) -->
+  <div class="welcome-card" *ngIf="auth.currentUser() as user">
+    <img [src]="auth.avatarUrl(user)" [alt]="user.username" class="welcome-avatar" />
+    <span class="welcome-text">Willkommen zurück, <strong>{{ user.username }}</strong>! 👋</span>
+  </div>
+
+  <!-- Hero / Titel als Container -->
+  <section class="hero-card">
     <div class="trophy">🏆</div>
     <h1>WM 2026 Tippspiel</h1>
 
@@ -15,10 +21,6 @@
         Jetzt mit Discord anmelden
       </button>
     </div>
-
-    <p class="welcome" *ngIf="auth.currentUser() as user">
-      Willkommen zurück, <strong>{{ user.username }}</strong>! 👋
-    </p>
   </section>
 
   <app-rules-card />

@@ -4,13 +4,42 @@
   padding: 2rem 1.5rem;
 }
 
-/* Hero */
-.hero {
-  text-align: center;
-  padding: 2.5rem 1rem;
-  margin-bottom: 2rem;
+/* Willkommen-Karte */
+.welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.25rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 1rem;
 
-  .trophy { font-size: 4rem; }
+  .welcome-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .welcome-text {
+    font-size: 1rem;
+    color: #c9d1d9;
+    strong { color: #f0c040; }
+  }
+}
+
+/* Hero / Titel als Container */
+.hero-card {
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #161b22 0%, #1c2230 100%);
+  border: 1px solid #30363d;
+  border-radius: 1rem;
+
+  .trophy { font-size: 3.5rem; line-height: 1; }
 
   h1 {
     font-size: 2rem;
@@ -40,13 +69,6 @@
 
   &:hover { background: #4752c4; transform: translateY(-1px); }
   &:active { transform: translateY(0); }
-}
-
-.welcome {
-  color: #c9d1d9;
-  font-size: 1.05rem;
-  margin-top: 1rem;
-  strong { color: #f0c040; }
 }
 
 /* Tipp-Erinnerung */
