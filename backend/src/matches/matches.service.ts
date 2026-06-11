@@ -14,6 +14,10 @@ export class MatchesService {
     return this.prisma.match.findUnique({ where: { id } });
   }
 
+  findByExternalId(externalId: number) {
+    return this.prisma.match.findUnique({ where: { externalId } });
+  }
+
   findUpcoming() {
     return this.prisma.match.findMany({
       where: { status: { in: [MatchStatus.SCHEDULED, MatchStatus.LIVE] } },

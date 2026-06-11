@@ -4,6 +4,21 @@ import { Cron } from '@nestjs/schedule';
 import { Match, MatchStatus } from '@prisma/client';
 import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
+import { TipsService } from '../tips/tips.service';
+
+/** API-Football Status-Kürzel → interner Match-Status. */
+const AF_STATUS: Record<string, MatchStatus> = {
+  TBD: MatchStatus.SCHEDULED, NS: MatchStatus.SCHEDULED,
+  '1H': MatchStatus.LIVE, HT: MatchStatus.LIVE, '2H': MatchStatus.LIVE,
+  ET: MatchStatus.LIVE, BT: MatchStatus.LIVE, P: MatchStatus.LIVE,
+  LIVE: MatchStatus.LIVE, INT: MatchStatus.LIVE, SUSP: MatchStatus.LIVE,
+  FT: MatchStatus.FINISHED, AET: MatchStatus.FINISHED, PEN: MatchStatus.FINISHED,
+  AWD: MatchStatus.FINISHED, WO: MatchStatus.FINISHED,
+  PST: MatchStatus.POSTPONED,
+  CANC: MatchStatus.CANCELLED, ABD: MatchStatus.CANCELLED,
+};
+
+const FINAL_AF_STATUS = ['FT', 'AET', 'PEN', 'AWD', 'WO'];
 
 export interface GoalEvent {
   minute: number;
@@ -88,9 +103,16 @@ export interface ApiStatus {
   isSyncing: boolean;
 }
 
-const DAILY_LIMIT = 100;
-const SAFETY_MARGIN = 5; // ab 95 Calls keine automatischen Syncs mehr
+const DAILY_LIMIT = Number(process.env.API_FOOTBALL_DAILY_LIMIT ?? 7500);
+const SAFETY_MARGIN = 100; // Puffer zum Tageslimit
 const MAX_MATCHES_PER_RUN = 12;
+
+interface FixtureResult {
+  details: MatchDetails;
+  afStatusShort: string | null;
+  scoreHome: number | null;
+  scoreAway: number | null;
+}
 
 @Injectable()
 export class MatchDetailsService {
@@ -100,6 +122,7 @@ export class MatchDetailsService {
   constructor(
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly tipsService: TipsService,
   ) {}
 
   // ─── Öffentlich: Detail-Abruf aus der DB (kein API-Call beim Seitenaufruf) ───
@@ -197,9 +220,9 @@ export class MatchDetailsService {
     return { ...result, status };
   }
 
-  // ─── Cron: alle 15 Minuten relevante Spiele synchronisieren ───
+  // ─── Cron: jede Minute relevante Spiele synchronisieren ───
 
-  @Cron('0 */15 * * * *') // alle 15 Minuten
+  @Cron('0 * * * * *') // jede Minute (nahezu Echtzeit während Live-Spielen)
   async scheduledSync() {
     await this.runSync(false);
   }
@@ -246,36 +269,38 @@ export class MatchDetailsService {
 
   private async findRelevantMatches(): Promise<Match[]> {
     const now = new Date();
-    const in90min = new Date(now.getTime() + 90 * 60 * 1000);
+    // Zeitfenster entkoppelt vom (ggf. verzögerten) football-data.org-Status:
+    // ab 90 Min vor Anpfiff (Aufstellungen) bis 3,5 Std danach (Live + Endstand)
+    const windowStart = new Date(now.getTime() - 3.5 * 60 * 60 * 1000);
+    const windowEnd = new Date(now.getTime() + 90 * 60 * 1000);
 
     return this.prisma.match.findMany({
       where: {
         OR: [
-          // laufende Spiele
+          // laufende Spiele (laut DB)
           { status: MatchStatus.LIVE },
-          // beendete Spiele, deren Details noch nicht (final) geladen wurden
+          // Spiele im Live-Zeitfenster — unabhängig vom DB-Status
           {
-            status: MatchStatus.FINISHED,
-            OR: [
-              { detailsSyncedAt: null },
-              { detailsSyncedAt: { lt: this.prisma.match.fields.updatedAt } },
-            ],
+            matchDate: { gte: windowStart, lte: windowEnd },
+            status: { notIn: [MatchStatus.POSTPONED, MatchStatus.CANCELLED] },
           },
-          // bald startende Spiele ohne Detaildaten (Aufstellungen)
-          {
-            status: MatchStatus.SCHEDULED,
-            matchDate: { gte: now, lte: in90min },
-            detailsSyncedAt: null,
-          },
+          // Sicherheitsnetz: beendete Spiele ganz ohne Details
+          { status: MatchStatus.FINISHED, detailsSyncedAt: null },
         ],
       },
       orderBy: { matchDate: 'asc' },
     });
   }
 
-  /** Holt Details für ein Spiel von der API und speichert sie in der DB. */
+  /** Holt Details für ein Spiel von der API, speichert sie und aktualisiert Status/Score. */
   private async fetchAndStoreDetails(match: Match): Promise<boolean> {
     try {
+      // Bereits final geladenes Spiel nicht erneut abrufen (spart Calls)
+      const stored = match.detailsJson as unknown as MatchDetails | null;
+      if (match.status === MatchStatus.FINISHED && stored?.status && FINAL_AF_STATUS.includes(stored.status)) {
+        return false;
+      }
+
       let fixtureId = match.apiFootballId;
       if (!fixtureId) {
         fixtureId = await this.resolveFixtureId(match.teamHome, match.teamAway, match.matchDate);
@@ -285,14 +310,27 @@ export class MatchDetailsService {
       }
       if (!fixtureId) return false;
 
-      const details = await this.fetchFixture(fixtureId);
+      const result = await this.fetchFixture(fixtureId);
+      const newStatus = result.afStatusShort
+        ? AF_STATUS[result.afStatusShort] ?? match.status
+        : match.status;
+      const becameFinished = newStatus === MatchStatus.FINISHED && match.status !== MatchStatus.FINISHED;
+
       await this.prisma.match.update({
         where: { id: match.id },
         data: {
-          detailsJson: details as any,
+          detailsJson: result.details as any,
           detailsSyncedAt: new Date(),
+          status: newStatus,
+          scoreHome: result.scoreHome,
+          scoreAway: result.scoreAway,
         },
       });
+
+      // Punkte berechnen, sobald das Spiel (neu) beendet ist
+      if (becameFinished) {
+        await this.tipsService.calculatePoints(match.id);
+      }
       return true;
     } catch (err: any) {
       this.logger.error(`Fehler beim Sync von Match ${match.id}: ${err?.message}`);
@@ -362,10 +400,12 @@ export class MatchDetailsService {
     return null;
   }
 
-  private async fetchFixture(fixtureId: number): Promise<MatchDetails> {
+  private async fetchFixture(fixtureId: number): Promise<FixtureResult> {
     const data = await this.apiGet('/fixtures', { id: fixtureId });
     const f = data?.response?.[0];
-    if (!f) return { available: false, message: 'Keine Detaildaten verfügbar.' };
+    if (!f) {
+      return { details: { available: false, message: 'Keine Detaildaten verfügbar.' }, afStatusShort: null, scoreHome: null, scoreAway: null };
+    }
 
     const homeId = f.teams?.home?.id;
     const sideOf = (teamId: number): 'home' | 'away' => (teamId === homeId ? 'home' : 'away');
@@ -424,7 +464,7 @@ export class MatchDetailsService {
 
     const lineups = (f.lineups ?? []) as any[];
 
-    return {
+    const details: MatchDetails = {
       available: true,
       venue: f.fixture?.venue?.name ?? null,
       referee: f.fixture?.referee ?? null,
@@ -445,6 +485,13 @@ export class MatchDetailsService {
         home: mapLineup(lineups.find((l) => l.team?.id === homeId)),
         away: mapLineup(lineups.find((l) => l.team?.id !== homeId)),
       },
+    };
+
+    return {
+      details,
+      afStatusShort: f.fixture?.status?.short ?? null,
+      scoreHome: f.goals?.home ?? null,
+      scoreAway: f.goals?.away ?? null,
     };
   }
 

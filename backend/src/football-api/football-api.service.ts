@@ -41,6 +41,16 @@ export class FootballApiService {
 
       for (const m of data.matches) {
         const mapped = this.mapMatch(m);
+
+        // Wird das Spiel gerade live von API-Football gepflegt (Status/Score),
+        // den (ggf. veralteten) football-data.org-Stand NICHT überschreiben.
+        const existing = await this.matchesService.findByExternalId(m.id);
+        const liveSynced =
+          existing?.apiFootballId &&
+          existing.detailsSyncedAt &&
+          Date.now() - existing.detailsSyncedAt.getTime() < 20 * 60 * 1000;
+        if (liveSynced) continue;
+
         const saved = await this.matchesService.upsertFromApi(mapped);
         if (mapped.status === MatchStatus.FINISHED) {
           await this.tipsService.calculatePoints(saved.id);
