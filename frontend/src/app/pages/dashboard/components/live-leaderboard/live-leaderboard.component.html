@@ -1,0 +1,25 @@
+<section class="card live-board">
+  <div class="lb-head">
+    <h3 class="card-title"><span class="live-dot"></span> Live-Rangliste</h3>
+    <span class="lb-hint">inkl. laufender Spiele</span>
+  </div>
+
+  <div class="lb-list">
+    <div *ngFor="let s of entries" class="lb-row" [class.me]="currentUserId === s.id" [class.top]="s.rank <= 3">
+      <span class="rank">{{ rankMedal(s.rank) }}</span>
+      <img [src]="avatarUrl(s)" [alt]="s.username" class="avatar" />
+      <span class="name">
+        {{ s.username }}
+        <span class="you" *ngIf="currentUserId === s.id">(Du)</span>
+      </span>
+      <span class="live-delta" *ngIf="s.livePoints > 0">+{{ s.livePoints }}</span>
+      <span class="pts">{{ s.totalPoints }}</span>
+    </div>
+
+    <div class="lb-empty" *ngIf="entries.length === 0">
+      Noch keine Teilnehmer in der Wertung.
+    </div>
+  </div>
+
+  <a routerLink="/standings" class="card-link">Vollständige Rangliste →</a>
+</section>

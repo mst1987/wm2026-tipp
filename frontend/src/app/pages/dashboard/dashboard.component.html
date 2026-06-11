@@ -6,10 +6,22 @@
     <span class="welcome-text">Willkommen zurück, <strong>{{ user.username }}</strong>! 👋</span>
   </div>
 
-  <!-- Hero / Titel als Container -->
+  <!-- Live-Spiel direkt unter dem Willkommen -->
+  <app-live-match-card *ngIf="liveMatch() as lm" [match]="lm" [details]="liveDetails()" />
+
+  <!-- Live-Rangliste während laufender Spiele -->
+  <app-live-leaderboard
+    *ngIf="liveMatch() && liveStandings().length > 0"
+    [entries]="liveStandings()"
+    [currentUserId]="auth.currentUser()?.id ?? null"
+  />
+
+  <!-- Hero / Titel als (kompakter) Container -->
   <section class="hero-card">
-    <div class="trophy">🏆</div>
-    <h1>WM 2026 Tippspiel</h1>
+    <div class="hero-title">
+      <span class="trophy">🏆</span>
+      <h1>WM 2026 Tippspiel</h1>
+    </div>
 
     <app-pot-card *ngIf="!loading()" [paidCount]="paidCount()" />
 
@@ -24,8 +36,6 @@
   </section>
 
   <app-rules-card />
-
-  <app-live-match-card *ngIf="liveMatch() as lm" [match]="lm" [details]="liveDetails()" />
 
   <!-- Hinweis: offene Tipps -->
   <a routerLink="/matches" class="tip-reminder" *ngIf="auth.isLoggedIn && !loading() && untippedCount() > 0">

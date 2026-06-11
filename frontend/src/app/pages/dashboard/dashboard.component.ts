@@ -1,15 +1,16 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { Match, MatchesService, ScorerEntry } from '../../core/matches.service';
-import { Standing, StandingsService } from '../../core/standings.service';
+import { Standing, StandingsService, LiveStanding } from '../../core/standings.service';
 import { Tip, TipsService } from '../../core/tips.service';
 import { MatchDetails, MatchDetailsService } from '../../core/match-details.service';
 import { PotCardComponent } from './components/pot-card/pot-card.component';
 import { RulesCardComponent } from './components/rules-card/rules-card.component';
 import { LiveMatchCardComponent } from './components/live-match-card/live-match-card.component';
+import { LiveLeaderboardComponent } from './components/live-leaderboard/live-leaderboard.component';
 import { TopScorersComponent } from './components/top-scorers/top-scorers.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview/leaderboard-preview.component';
 import { UpcomingMatchesComponent } from './components/upcoming-matches/upcoming-matches.component';
@@ -23,6 +24,7 @@ import { UpcomingMatchesComponent } from './components/upcoming-matches/upcoming
     PotCardComponent,
     RulesCardComponent,
     LiveMatchCardComponent,
+    LiveLeaderboardComponent,
     TopScorersComponent,
     LeaderboardPreviewComponent,
     UpcomingMatchesComponent,
@@ -30,7 +32,7 @@ import { UpcomingMatchesComponent } from './components/upcoming-matches/upcoming
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   top5 = signal<Standing[]>([]);
   upcoming = signal<Match[]>([]);
   untippedCount = signal(0);
@@ -40,6 +42,9 @@ export class DashboardComponent implements OnInit {
   scorers = signal<ScorerEntry[]>([]);
   liveMatch = signal<Match | null>(null);
   liveDetails = signal<MatchDetails | null>(null);
+  liveStandings = signal<LiveStanding[]>([]);
+
+  private liveTimer?: ReturnType<typeof setInterval>;
 
   constructor(
     public auth: AuthService,
@@ -56,24 +61,50 @@ export class DashboardComponent implements OnInit {
       allMatches: this.auth.isLoggedIn ? this.matchesService.getAll() : of([] as Match[]),
       tips: this.auth.isLoggedIn ? this.tipsService.getMyTips() : of([] as Tip[]),
       scorers: this.matchesService.getScorers(),
+      live: this.standingsService.getLiveLeaderboard(),
     }).subscribe({
-      next: ({ standings, matches, allMatches, tips, scorers }) => {
+      next: ({ standings, matches, allMatches, tips, scorers, live }) => {
         this.top5.set(standings.ranked.slice(0, 5));
         this.paidCount.set(standings.ranked.length);
         this.upcoming.set(matches.filter((m) => m.status !== 'LIVE').slice(0, 5));
         this.untippedCount.set(this.countUntipped(allMatches, tips));
         this.scorers.set(scorers.slice(0, 10));
+        this.liveStandings.set(live.entries);
 
-        const live = matches.find((m) => m.status === 'LIVE');
-        if (live) {
-          this.liveMatch.set(live);
-          this.matchDetailsService.getDetails(live.id).subscribe({
-            next: (d) => this.liveDetails.set(d),
-          });
-        }
+        this.applyLiveMatch(matches);
         this.loading.set(false);
+
+        // Während Live-Spielen alle 60 Sek aktualisieren
+        this.liveTimer = setInterval(() => this.refreshLive(), 60_000);
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.liveTimer) clearInterval(this.liveTimer);
+  }
+
+  /** Live-Spiel + Detail-Daten aus der Spielliste übernehmen. */
+  private applyLiveMatch(matches: Match[]) {
+    const live = matches.find((m) => m.status === 'LIVE') ?? null;
+    this.liveMatch.set(live);
+    if (live) {
+      this.matchDetailsService.getDetails(live.id).subscribe({
+        next: (d) => this.liveDetails.set(d),
+      });
+    } else {
+      this.liveDetails.set(null);
+    }
+  }
+
+  /** Periodische Aktualisierung von Live-Spiel, Details und Live-Rangliste. */
+  private refreshLive() {
+    this.matchesService.getUpcoming().subscribe({
+      next: (matches) => this.applyLiveMatch(matches),
+    });
+    this.standingsService.getLiveLeaderboard().subscribe({
+      next: (lb) => this.liveStandings.set(lb.entries),
     });
   }
 

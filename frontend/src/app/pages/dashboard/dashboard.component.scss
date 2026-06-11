@@ -30,27 +30,34 @@
   }
 }
 
-/* Hero / Titel als Container */
+/* Hero / Titel als kompakter Container */
 .hero-card {
   text-align: center;
-  padding: 2.25rem 1.5rem;
+  padding: 1.1rem 1.25rem;
   margin-bottom: 1.5rem;
   background: linear-gradient(135deg, #161b22 0%, #1c2230 100%);
   border: 1px solid #30363d;
   border-radius: 1rem;
 
-  .trophy { font-size: 3.5rem; line-height: 1; }
+  .hero-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
 
-  h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin: 0.5rem 0;
-    background: linear-gradient(90deg, #f0c040, #e8a020);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    .trophy { font-size: 1.8rem; line-height: 1; }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0;
+      background: linear-gradient(90deg, #f0c040, #e8a020);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
   }
 
-  .hero-actions { margin-top: 1.5rem; }
+  .hero-actions { margin-top: 1.1rem; }
 }
 
 .btn-discord {

@@ -11,4 +11,9 @@ export class StandingsController {
   getLeaderboard() {
     return this.standingsService.getLeaderboard();
   }
+
+  @Get('live')
+  getLiveLeaderboard() {
+    return this.standingsService.getLiveLeaderboard();
+  }
 }
