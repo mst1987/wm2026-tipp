@@ -89,9 +89,10 @@ export class StandingsService {
     return { hasLive: liveMatchIds.size > 0, entries: ranked };
   }
 
-  /** 3 Punkte für exaktes Ergebnis, 1 Punkt für richtige Tendenz, sonst 0. */
+  /** 3 = exakt, 2 = richtige Tordifferenz, 1 = richtige Tendenz, sonst 0. */
   private provisionalPoints(ph: number, pa: number, ah: number, aa: number): number {
     if (ph === ah && pa === aa) return 3;
+    if (ph - pa === ah - aa) return 2;
     if (Math.sign(ph - pa) === Math.sign(ah - aa)) return 1;
     return 0;
   }

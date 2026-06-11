@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TipsService } from './tips.service';
 import { CreateTipDto } from './dto/create-tip.dto';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt.guard';
 
 @ApiTags('tips')
 @Controller('tips')
@@ -10,8 +11,9 @@ export class TipsController {
   constructor(private readonly tipsService: TipsService) {}
 
   @Get('user/:userId')
-  getTipsByUser(@Param('userId') userId: string) {
-    return this.tipsService.findByUser(userId);
+  @UseGuards(OptionalJwtAuthGuard)
+  getTipsByUser(@Req() req: any, @Param('userId') userId: string) {
+    return this.tipsService.findByUserVisibleTo(userId, req.user?.id);
   }
 
   @Get()

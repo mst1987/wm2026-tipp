@@ -41,3 +41,24 @@
     small { font-size: 0.78rem; color: #8b949e; line-height: 1.35; }
   }
 }
+
+.scoring {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  .scoring-title { font-size: 0.82rem; color: #8b949e; font-weight: 600; }
+
+  .score-chip {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+
+    &.exact    { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+    &.diff     { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
+    &.tendency { background: rgba(240, 192, 64, 0.15); color: #f0c040; }
+  }
+}

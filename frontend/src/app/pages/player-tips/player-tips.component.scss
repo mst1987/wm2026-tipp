@@ -56,6 +56,7 @@
 
   &.total    { background: rgba(240, 192, 64, 0.15); color: #f0c040; }
   &.exact    { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+  &.diff     { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
   &.tendency { background: rgba(240, 192, 64, 0.12); color: #d9b44a; }
 }
 
@@ -168,6 +169,8 @@
 /* Tipp-Box dezent */
 .predicted-box {
   background: #0d1117;
+
+  &.hidden .box-score { color: #8b949e; }
 }
 
 /* Ergebnis-Box hervorgehoben */
@@ -183,6 +186,11 @@
     background: rgba(63, 185, 80, 0.12);
     border-color: #3fb950;
     .box-score { color: #3fb950; }
+  }
+  &.diff {
+    background: rgba(88, 166, 255, 0.12);
+    border-color: #58a6ff;
+    .box-score { color: #58a6ff; }
   }
   &.tendency {
     background: rgba(240, 192, 64, 0.12);
@@ -211,6 +219,7 @@
   color: #8b949e;
 
   &.exact    { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+  &.diff     { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
   &.tendency { background: rgba(240, 192, 64, 0.15); color: #f0c040; }
   &.wrong    { background: rgba(248, 81, 73, 0.12); color: #f85149; }
   &.pending  { background: #21262d; color: #8b949e; }

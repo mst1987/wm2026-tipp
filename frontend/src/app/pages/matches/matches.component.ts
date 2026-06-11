@@ -192,15 +192,18 @@ export class MatchesComponent implements OnInit {
   /** Berechnet erzielte oder aktuell mögliche Punkte für einen Tipp */
   calcPoints(tip: Tip, match: Match): number | null {
     if (match.scoreHome === null || match.scoreAway === null) return null;
+    if (tip.predictedHome === null || tip.predictedAway === null) return null;
     const ph = tip.predictedHome, pa = tip.predictedAway;
     const ah = match.scoreHome,   aa = match.scoreAway;
-    if (ph === ah && pa === aa) return 3;
-    if (Math.sign(ph - pa) === Math.sign(ah - aa)) return 1;
+    if (ph === ah && pa === aa) return 3;          // exakt
+    if (ph - pa === ah - aa) return 2;             // richtige Tordifferenz
+    if (Math.sign(ph - pa) === Math.sign(ah - aa)) return 1; // richtige Tendenz
     return 0;
   }
 
   pointsClass(points: number | null): string {
     if (points === 3) return 'pts-exact';
+    if (points === 2) return 'pts-diff';
     if (points === 1) return 'pts-tendency';
     if (points === 0) return 'pts-wrong';
     return '';

@@ -244,6 +244,11 @@
     color: #3fb950;
     border: 1px solid #3fb950;
   }
+  &.pts-diff {
+    background: rgba(88, 166, 255, 0.15);
+    color: #58a6ff;
+    border: 1px solid #58a6ff;
+  }
   &.pts-tendency {
     background: rgba(240, 192, 64, 0.15);
     color: #f0c040;

@@ -104,7 +104,8 @@
         <ng-container *ngIf="match.status === 'FINISHED'">
           <span class="tip-points-badge" [class]="pointsClass(calcPoints(tip, match))">
             {{ calcPoints(tip, match) }} Pkt
-            <span *ngIf="calcPoints(tip, match) === 3">✓✓</span>
+            <span *ngIf="calcPoints(tip, match) === 3">🎯</span>
+            <span *ngIf="calcPoints(tip, match) === 2">✓✓</span>
             <span *ngIf="calcPoints(tip, match) === 1">✓</span>
             <span *ngIf="calcPoints(tip, match) === 0">✗</span>
           </span>

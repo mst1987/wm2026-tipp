@@ -6,10 +6,11 @@ import { Match } from './matches.service';
 export interface Tip {
   id: string;
   matchId: string;
-  predictedHome: number;
-  predictedAway: number;
+  predictedHome: number | null;
+  predictedAway: number | null;
   points: number;
   pointsAwarded: boolean;
+  hidden?: boolean;
   match: Match;
 }
 

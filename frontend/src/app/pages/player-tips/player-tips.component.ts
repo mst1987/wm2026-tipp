@@ -59,6 +59,10 @@ export class PlayerTipsComponent implements OnInit {
     return this.tips().filter((t) => t.pointsAwarded && t.points === 3).length;
   }
 
+  diffCount(): number {
+    return this.tips().filter((t) => t.pointsAwarded && t.points === 2).length;
+  }
+
   tendencyCount(): number {
     return this.tips().filter((t) => t.pointsAwarded && t.points === 1).length;
   }
@@ -78,6 +82,7 @@ export class PlayerTipsComponent implements OnInit {
   tipClass(tip: Tip): string {
     if (!tip.pointsAwarded) return '';
     if (tip.points === 3) return 'exact';
+    if (tip.points === 2) return 'diff';
     if (tip.points === 1) return 'tendency';
     return 'wrong';
   }

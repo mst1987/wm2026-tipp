@@ -14,6 +14,24 @@ export class TipsService {
     });
   }
 
+  /**
+   * Tipps eines Spielers für einen Betrachter. Fremde Tipps auf Spiele, die
+   * noch tippbar sind (Deadline nicht erreicht), werden verdeckt — so kann
+   * niemand abschreiben, bevor die Tipps gesperrt sind.
+   */
+  async findByUserVisibleTo(userId: string, requesterId?: string) {
+    const tips = await this.findByUser(userId);
+    if (requesterId === userId) return tips; // eigene Tipps immer sichtbar
+
+    const now = Date.now();
+    return tips.map((tip) => {
+      const deadline = tip.match.matchDate.getTime() - 10 * 60 * 1000;
+      const stillTippable = tip.match.status === MatchStatus.SCHEDULED && now < deadline;
+      if (!stillTippable) return { ...tip, hidden: false };
+      return { ...tip, predictedHome: null, predictedAway: null, hidden: true };
+    });
+  }
+
   findByMatch(matchId: string) {
     return this.prisma.tip.findMany({
       where: { matchId },
@@ -66,8 +84,9 @@ export class TipsService {
   }
 
   private computePoints(predHome: number, predAway: number, actualHome: number, actualAway: number): number {
-    if (predHome === actualHome && predAway === actualAway) return 3;
-    if (Math.sign(predHome - predAway) === Math.sign(actualHome - actualAway)) return 1;
+    if (predHome === actualHome && predAway === actualAway) return 3; // exaktes Ergebnis
+    if (predHome - predAway === actualHome - actualAway) return 2;    // richtige Tordifferenz
+    if (Math.sign(predHome - predAway) === Math.sign(actualHome - actualAway)) return 1; // richtige Tendenz
     return 0;
   }
 }

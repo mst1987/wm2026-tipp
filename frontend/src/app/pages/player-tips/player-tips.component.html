@@ -12,6 +12,7 @@
         <div class="stat-pills">
           <span class="pill total">{{ totalPoints() }} Punkte</span>
           <span class="pill exact">{{ exactCount() }}× Exakt</span>
+          <span class="pill diff">{{ diffCount() }}× Tordiff.</span>
           <span class="pill tendency">{{ tendencyCount() }}× Tendenz</span>
           <span class="pill count">{{ tips().length }} Tipps</span>
         </div>
@@ -47,10 +48,14 @@
           </span>
 
           <div class="score-block">
-            <!-- Tipp -->
-            <div class="predicted-box" title="Abgegebener Tipp">
+            <!-- Tipp (verdeckt solange noch tippbar) -->
+            <div class="predicted-box" [class.hidden]="tip.hidden"
+                 [title]="tip.hidden ? 'Sichtbar, sobald keine Tipps mehr möglich sind' : 'Abgegebener Tipp'">
               <span class="box-label">Tipp</span>
-              <span class="box-score">{{ tip.predictedHome }}:{{ tip.predictedAway }}</span>
+              <span class="box-score">
+                <ng-container *ngIf="!tip.hidden; else lockedTip">{{ tip.predictedHome }}:{{ tip.predictedAway }}</ng-container>
+                <ng-template #lockedTip>🔒</ng-template>
+              </span>
             </div>
 
             <!-- Ergebnis (hervorgehoben) -->
@@ -72,6 +77,7 @@
           <ng-container *ngIf="tip.pointsAwarded; else pending">
             <span class="pts-badge" [class]="tipClass(tip)">
               <ng-container *ngIf="tip.points === 3">🎯 Exakt · +3 Punkte</ng-container>
+              <ng-container *ngIf="tip.points === 2">✓✓ Tordifferenz · +2 Punkte</ng-container>
               <ng-container *ngIf="tip.points === 1">↗ Tendenz · +1 Punkt</ng-container>
               <ng-container *ngIf="tip.points === 0">✗ Daneben · 0 Punkte</ng-container>
             </span>
