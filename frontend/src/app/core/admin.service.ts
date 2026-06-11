@@ -53,4 +53,11 @@ export class AdminService {
   syncDetails() {
     return this.http.post<SyncResult>(`${this.base}/sync-details`, {});
   }
+
+  recalculatePoints() {
+    return this.http.post<{ matches: number; updatedTips: number }>(
+      `${this.base}/recalculate-points`,
+      {},
+    );
+  }
 }

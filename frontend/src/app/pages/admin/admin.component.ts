@@ -78,6 +78,27 @@ export class AdminComponent implements OnInit, OnDestroy {
     });
   }
 
+  recalculating = signal(false);
+  recalcMessage = signal<string | null>(null);
+
+  recalcPoints() {
+    if (this.recalculating()) return;
+    this.recalculating.set(true);
+    this.recalcMessage.set(null);
+    this.adminService.recalculatePoints().subscribe({
+      next: (res) => {
+        this.recalcMessage.set(
+          `✓ ${res.updatedTips} Tipp${res.updatedTips === 1 ? '' : 's'} aus ${res.matches} Spiel${res.matches === 1 ? '' : 'en'} neu berechnet.`,
+        );
+        this.recalculating.set(false);
+      },
+      error: () => {
+        this.recalcMessage.set('Fehler bei der Neuberechnung.');
+        this.recalculating.set(false);
+      },
+    });
+  }
+
   /** "vor X Minuten/Sekunden/Stunden" – reaktiv über now(). */
   timeAgo(iso: string | null): string {
     if (!iso) return 'nie';

@@ -54,7 +54,19 @@
       </div>
 
       <p class="api-hint">
-        Automatischer Sync alle 15 Minuten (nur laufende, kürzlich beendete und bald startende Spiele).
+        Automatischer Sync jede Minute (nur laufende, kürzlich beendete und bald startende Spiele).
+      </p>
+
+      <div class="api-actions recalc-row">
+        <button class="btn-recalc" (click)="recalcPoints()" [disabled]="recalculating()">
+          <ng-container *ngIf="recalculating()">⏳ Berechne...</ng-container>
+          <ng-container *ngIf="!recalculating()">🧮 Punkte neu berechnen</ng-container>
+        </button>
+        <span class="sync-msg" *ngIf="recalcMessage()">{{ recalcMessage() }}</span>
+      </div>
+
+      <p class="api-hint">
+        Berechnet die Punkte aller beendeten Spiele neu (z. B. nach einer Regeländerung).
       </p>
     </div>
 

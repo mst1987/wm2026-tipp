@@ -83,6 +83,42 @@ export class TipsService {
     }
   }
 
+  /**
+   * Berechnet die Punkte ALLER Tipps auf beendete Spiele neu (auch bereits
+   * gewertete) — z. B. nach einer Änderung der Wertungsregeln.
+   */
+  async recalculateAllPoints() {
+    const matches = await this.prisma.match.findMany({
+      where: {
+        status: MatchStatus.FINISHED,
+        scoreHome: { not: null },
+        scoreAway: { not: null },
+      },
+      include: { tips: true },
+    });
+
+    let updatedTips = 0;
+    for (const match of matches) {
+      for (const tip of match.tips) {
+        const points = this.computePoints(
+          tip.predictedHome,
+          tip.predictedAway,
+          match.scoreHome!,
+          match.scoreAway!,
+        );
+        if (tip.points !== points || !tip.pointsAwarded) {
+          await this.prisma.tip.update({
+            where: { id: tip.id },
+            data: { points, pointsAwarded: true },
+          });
+          updatedTips++;
+        }
+      }
+    }
+
+    return { matches: matches.length, updatedTips };
+  }
+
   private computePoints(predHome: number, predAway: number, actualHome: number, actualAway: number): number {
     if (predHome === actualHome && predAway === actualAway) return 3; // exaktes Ergebnis
     if (predHome - predAway === actualHome - actualAway) return 2;    // richtige Tordifferenz

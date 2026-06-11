@@ -4,6 +4,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { MatchDetailsService } from '../match-details/match-details.service';
+import { TipsService } from '../tips/tips.service';
 
 @ApiTags('admin')
 @ApiBearerAuth()
@@ -13,6 +14,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly matchDetailsService: MatchDetailsService,
+    private readonly tipsService: TipsService,
   ) {}
 
   @Get('users')
@@ -40,5 +42,10 @@ export class AdminController {
   @Post('sync-details')
   syncDetails() {
     return this.matchDetailsService.manualSync();
+  }
+
+  @Post('recalculate-points')
+  recalculatePoints() {
+    return this.tipsService.recalculateAllPoints();
   }
 }
