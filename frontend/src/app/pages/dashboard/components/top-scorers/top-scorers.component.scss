@@ -1,46 +1,49 @@
+:host { display: block; height: 100%; }
+
 .card {
-  display: block;
+  height: 100%;
+  box-sizing: border-box;
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 1rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.1rem;
 }
 
 .card-title {
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   color: #c9d1d9;
 }
 
-.scorers-card { margin-top: 1.5rem; }
+.scorers-empty { color: #8b949e; font-size: 0.82rem; }
 
 .scorers-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
 
   thead th {
     text-align: center;
-    font-size: 0.74rem;
+    font-size: 0.68rem;
     font-weight: 700;
     color: #8b949e;
-    padding: 0.4rem 0.4rem;
+    padding: 0.25rem 0.3rem;
     border-bottom: 1px solid #30363d;
   }
 
   tbody td {
-    padding: 0.5rem 0.4rem;
+    padding: 0.32rem 0.3rem;
     border-bottom: 1px solid #21262d;
     text-align: center;
   }
   tbody tr:last-child td { border-bottom: none; }
 
-  .c-rank { width: 28px; color: #8b949e; font-weight: 700; }
+  .c-rank { width: 22px; color: #8b949e; font-weight: 700; }
   .c-player { text-align: left; }
-  .c-num { width: 42px; }
+  .c-num { width: 32px; }
   .c-total { font-weight: 800; color: #f0c040; }
 
-  .sc-name { font-weight: 600; display: block; }
-  .sc-team { font-size: 0.72rem; color: #8b949e; }
+  .sc-name { font-weight: 600; display: block; font-size: 0.8rem; }
+  .sc-team { font-size: 0.66rem; color: #8b949e; }
 }

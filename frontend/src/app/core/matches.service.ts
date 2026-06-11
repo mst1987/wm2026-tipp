@@ -39,6 +39,10 @@ export class MatchesService {
     return this.http.get<Match[]>(`${this.base}/upcoming`);
   }
 
+  getRecent() {
+    return this.http.get<Match[]>(`${this.base}/recent`);
+  }
+
   getScorers() {
     return this.http.get<ScorerEntry[]>(`${this.base}/scorers`);
   }

@@ -1,6 +1,7 @@
 <section class="card scorers-card">
   <h3 class="card-title">👟 Torschützen & Scorer</h3>
-  <table class="scorers-table">
+  <div class="scorers-empty" *ngIf="scorers.length === 0">Noch keine Torschützen.</div>
+  <table class="scorers-table" *ngIf="scorers.length > 0">
     <thead>
       <tr>
         <th class="c-rank">#</th>

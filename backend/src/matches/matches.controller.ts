@@ -21,6 +21,11 @@ export class MatchesController {
     return this.matchesService.findUpcoming();
   }
 
+  @Get('recent')
+  findRecent() {
+    return this.matchesService.findRecent();
+  }
+
   @Get('scorers')
   getScorers() {
     return this.matchDetailsService.getTopScorers();

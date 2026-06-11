@@ -1,0 +1,21 @@
+<section class="card">
+  <h3 class="card-title">🏁 Letzte Ergebnisse</h3>
+  <div class="results-empty" *ngIf="matches.length === 0">
+    Noch keine Ergebnisse.
+  </div>
+  <div class="results-list">
+    <a *ngFor="let m of matches" class="result-row" [attr.data-group]="normalizeGroup(m.group)"
+       [routerLink]="['/matches', m.id]">
+      <span class="r-date">{{ formatDate(m.matchDate) }}</span>
+      <span class="r-match">
+        <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="r-flag" />
+        {{ m.teamHome }}
+        <span class="r-score">{{ m.scoreHome }}:{{ m.scoreAway }}</span>
+        {{ m.teamAway }}
+        <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="r-flag" />
+      </span>
+      <span class="r-group" *ngIf="m.group">Gr. {{ normalizeGroup(m.group) }}</span>
+    </a>
+  </div>
+  <a routerLink="/matches" class="card-link">Alle Spiele →</a>
+</section>

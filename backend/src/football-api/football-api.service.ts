@@ -42,14 +42,11 @@ export class FootballApiService {
       for (const m of data.matches) {
         const mapped = this.mapMatch(m);
 
-        // Wird das Spiel gerade live von API-Football gepflegt (Status/Score),
-        // den (ggf. veralteten) football-data.org-Stand NICHT überschreiben.
+        // Sobald API-Football ein Spiel übernommen hat (Fixture aufgelöst),
+        // ist es dort die maßgebliche Quelle für Status/Score — football-data.org
+        // (verzögerter Free-Tier) darf es dann nicht mehr überschreiben.
         const existing = await this.matchesService.findByExternalId(m.id);
-        const liveSynced =
-          existing?.apiFootballId &&
-          existing.detailsSyncedAt &&
-          Date.now() - existing.detailsSyncedAt.getTime() < 20 * 60 * 1000;
-        if (liveSynced) continue;
+        if (existing?.apiFootballId) continue;
 
         const saved = await this.matchesService.upsertFromApi(mapped);
         if (mapped.status === MatchStatus.FINISHED) {

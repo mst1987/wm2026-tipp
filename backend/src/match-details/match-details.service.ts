@@ -295,9 +295,14 @@ export class MatchDetailsService {
   /** Holt Details für ein Spiel von der API, speichert sie und aktualisiert Status/Score. */
   private async fetchAndStoreDetails(match: Match): Promise<boolean> {
     try {
-      // Bereits final geladenes Spiel nicht erneut abrufen (spart Calls)
+      // Bereits final geladenes Spiel mit gültigem Endstand nicht erneut abrufen
       const stored = match.detailsJson as unknown as MatchDetails | null;
-      if (match.status === MatchStatus.FINISHED && stored?.status && FINAL_AF_STATUS.includes(stored.status)) {
+      if (
+        match.status === MatchStatus.FINISHED &&
+        match.scoreHome !== null &&
+        stored?.status &&
+        FINAL_AF_STATUS.includes(stored.status)
+      ) {
         return false;
       }
 
@@ -314,7 +319,6 @@ export class MatchDetailsService {
       const newStatus = result.afStatusShort
         ? AF_STATUS[result.afStatusShort] ?? match.status
         : match.status;
-      const becameFinished = newStatus === MatchStatus.FINISHED && match.status !== MatchStatus.FINISHED;
 
       await this.prisma.match.update({
         where: { id: match.id },
@@ -327,8 +331,9 @@ export class MatchDetailsService {
         },
       });
 
-      // Punkte berechnen, sobald das Spiel (neu) beendet ist
-      if (becameFinished) {
+      // Punkte berechnen, sobald das Spiel beendet ist (idempotent — wertet
+      // nur noch nicht vergebene Tipps aus)
+      if (newStatus === MatchStatus.FINISHED && result.scoreHome !== null) {
         await this.tipsService.calculatePoints(match.id);
       }
       return true;

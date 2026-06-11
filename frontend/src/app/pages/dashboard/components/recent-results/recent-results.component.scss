@@ -1,0 +1,80 @@
+:host { display: block; height: 100%; }
+
+.card {
+  height: 100%;
+  box-sizing: border-box;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #c9d1d9;
+}
+
+.card-link {
+  font-size: 0.82rem;
+  color: #58a6ff;
+  text-decoration: none;
+  margin-top: auto;
+
+  &:hover { text-decoration: underline; }
+}
+
+.results-empty {
+  color: #8b949e;
+  font-size: 0.88rem;
+}
+
+.results-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #0d1117;
+  border-left: 3px solid #30363d;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+
+  &:hover { background: #161b22; }
+
+  @each $g, $c in (A, #e74c3c), (B, #e67e22), (C, #f1c40f), (D, #2ecc71),
+                   (E, #1abc9c), (F, #3498db), (G, #9b59b6), (H, #e91e63),
+                   (I, #ff5722), (J, #8bc34a), (K, #00bcd4), (L, #ff9800) {
+    &[data-group="#{$g}"] { border-left-color: $c; }
+  }
+
+  .r-date { font-size: 0.78rem; color: #8b949e; min-width: 64px; }
+  .r-match {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .r-flag { width: 20px; height: 15px; object-fit: contain; flex-shrink: 0; }
+    .r-score {
+      font-weight: 800;
+      color: #f0c040;
+      flex-shrink: 0;
+      padding: 0 0.15rem;
+    }
+  }
+  .r-group { font-size: 0.72rem; color: #8b949e; white-space: nowrap; }
+}

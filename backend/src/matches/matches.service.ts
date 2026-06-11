@@ -25,6 +25,14 @@ export class MatchesService {
     });
   }
 
+  findRecent(limit = 5) {
+    return this.prisma.match.findMany({
+      where: { status: MatchStatus.FINISHED },
+      orderBy: { matchDate: 'desc' },
+      take: limit,
+    });
+  }
+
   async upsertFromApi(data: {
     externalId: number;
     matchDate: Date;

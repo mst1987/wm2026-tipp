@@ -14,6 +14,7 @@ import { LiveLeaderboardComponent } from './components/live-leaderboard/live-lea
 import { TopScorersComponent } from './components/top-scorers/top-scorers.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview/leaderboard-preview.component';
 import { UpcomingMatchesComponent } from './components/upcoming-matches/upcoming-matches.component';
+import { RecentResultsComponent } from './components/recent-results/recent-results.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,6 +29,7 @@ import { UpcomingMatchesComponent } from './components/upcoming-matches/upcoming
     TopScorersComponent,
     LeaderboardPreviewComponent,
     UpcomingMatchesComponent,
+    RecentResultsComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -40,6 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   paidCount = signal(0);
   scorers = signal<ScorerEntry[]>([]);
+  recent = signal<Match[]>([]);
   liveMatch = signal<Match | null>(null);
   liveDetails = signal<MatchDetails | null>(null);
   liveStandings = signal<LiveStanding[]>([]);
@@ -61,14 +64,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       allMatches: this.auth.isLoggedIn ? this.matchesService.getAll() : of([] as Match[]),
       tips: this.auth.isLoggedIn ? this.tipsService.getMyTips() : of([] as Tip[]),
       scorers: this.matchesService.getScorers(),
+      recent: this.matchesService.getRecent(),
       live: this.standingsService.getLiveLeaderboard(),
     }).subscribe({
-      next: ({ standings, matches, allMatches, tips, scorers, live }) => {
+      next: ({ standings, matches, allMatches, tips, scorers, recent, live }) => {
         this.top5.set(standings.ranked.slice(0, 5));
         this.paidCount.set(standings.ranked.length);
         this.upcoming.set(matches.filter((m) => m.status !== 'LIVE').slice(0, 5));
         this.untippedCount.set(this.countUntipped(allMatches, tips));
         this.scorers.set(scorers.slice(0, 10));
+        this.recent.set(recent);
         this.liveStandings.set(live.entries);
 
         this.applyLiveMatch(matches);

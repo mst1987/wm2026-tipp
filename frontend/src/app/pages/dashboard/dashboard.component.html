@@ -77,7 +77,11 @@
     <app-upcoming-matches [matches]="upcoming()" />
   </div>
 
-  <app-top-scorers *ngIf="!loading() && scorers().length > 0" [scorers]="scorers()" />
+  <!-- Letzte Ergebnisse (links) + Torschützen (rechts, kompakt) -->
+  <div class="grid" *ngIf="!loading() && (recent().length > 0 || scorers().length > 0)">
+    <app-recent-results [matches]="recent()" />
+    <app-top-scorers [scorers]="scorers()" />
+  </div>
 
   <div class="loading" *ngIf="loading()">Lade Daten...</div>
 </div>
