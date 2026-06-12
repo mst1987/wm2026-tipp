@@ -20,6 +20,21 @@ const AF_STATUS: Record<string, MatchStatus> = {
 
 const FINAL_AF_STATUS = ['FT', 'AET', 'PEN', 'AWD', 'WO'];
 
+/**
+ * Bekannte Namensvarianten zwischen football-data.org und API-Football
+ * auf eine kanonische (normalisierte) Form bringen. Dice fängt den Rest ab.
+ */
+const TEAM_ALIASES: Record<string, string> = {
+  usa: 'united states',
+  'czech republic': 'czechia',
+  turkiye: 'turkey',
+  'ir iran': 'iran',
+  'korea republic': 'south korea',
+  'korea dpr': 'north korea',
+  'cape verde islands': 'cape verde',
+  'china pr': 'china',
+};
+
 export interface GoalEvent {
   minute: number;
   extra: number | null;
@@ -395,14 +410,21 @@ export class MatchDetailsService {
     const nh = this.norm(teamHome);
     const na = this.norm(teamAway);
 
+    // Bestes Fixture nach Namensähnlichkeit wählen (robust gegen Varianten
+    // wie "Czechia" vs "Czech Republic"). Datum + beide Teams disambiguieren.
+    let best: any = null;
+    let bestScore = 0;
     for (const f of fixtures) {
       const fh = this.norm(f.teams?.home?.name ?? '');
       const fa = this.norm(f.teams?.away?.name ?? '');
-      if (this.teamsMatch(nh, fh) && this.teamsMatch(na, fa)) {
-        return f.fixture?.id ?? null;
+      const sh = this.similarity(nh, fh);
+      const sa = this.similarity(na, fa);
+      if (sh >= 0.34 && sa >= 0.34 && sh + sa > bestScore) {
+        bestScore = sh + sa;
+        best = f;
       }
     }
-    return null;
+    return bestScore >= 1.0 ? best?.fixture?.id ?? null : null;
   }
 
   private async fetchFixture(fixtureId: number): Promise<FixtureResult> {
@@ -501,20 +523,42 @@ export class MatchDetailsService {
   }
 
   private norm(name: string): string {
-    return name
+    const n = name
       .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9 ]/g, '')
+      .replace(/\s+/g, ' ')
       .trim();
+    return TEAM_ALIASES[n] ?? n;
   }
 
-  private teamsMatch(a: string, b: string): boolean {
-    if (!a || !b) return false;
-    if (a === b) return true;
-    if (a.includes(b) || b.includes(a)) return true;
-    const fa = a.split(' ')[0];
-    const fb = b.split(' ')[0];
-    return fa.length > 2 && fa === fb;
+  /** Ähnlichkeit zweier normalisierter Teamnamen (0..1). */
+  private similarity(a: string, b: string): number {
+    if (!a || !b) return 0;
+    if (a === b) return 1;
+    if (a.includes(b) || b.includes(a)) return 0.95;
+    return this.dice(a.replace(/ /g, ''), b.replace(/ /g, ''));
+  }
+
+  /** Sørensen-Dice-Koeffizient über Zeichen-Bigramme. */
+  private dice(a: string, b: string): number {
+    if (a.length < 2 || b.length < 2) return 0;
+    const bigrams = (s: string) => {
+      const m = new Map<string, number>();
+      for (let i = 0; i < s.length - 1; i++) {
+        const g = s.slice(i, i + 2);
+        m.set(g, (m.get(g) ?? 0) + 1);
+      }
+      return m;
+    };
+    const A = bigrams(a);
+    const B = bigrams(b);
+    let overlap = 0;
+    for (const [g, c] of A) {
+      const d = B.get(g);
+      if (d) overlap += Math.min(c, d);
+    }
+    return (2 * overlap) / (a.length - 1 + (b.length - 1));
   }
 }
