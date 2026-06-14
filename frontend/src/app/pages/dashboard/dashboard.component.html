@@ -31,6 +31,7 @@
     *ngIf="liveMatch() && liveStandings().length > 0"
     [entries]="liveStandings()"
     [currentUserId]="auth.currentUser()?.id ?? null"
+    [liveMatch]="liveMatch()"
   />
 
   <!-- Hinweis: offene Tipps -->

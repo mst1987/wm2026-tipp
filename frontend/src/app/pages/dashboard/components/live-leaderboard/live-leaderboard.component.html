@@ -1,7 +1,11 @@
 <section class="card live-board">
   <div class="lb-head">
     <h3 class="card-title"><span class="live-dot"></span> Live-Rangliste</h3>
-    <span class="lb-hint">inkl. laufender Spiele</span>
+    <span class="lb-hint" *ngIf="liveMatch as lm">
+      <img *ngIf="lm.teamHomeLogo" [src]="lm.teamHomeLogo" [alt]="lm.teamHome" class="hint-flag" />
+      {{ lm.scoreHome ?? 0 }}:{{ lm.scoreAway ?? 0 }}
+      <img *ngIf="lm.teamAwayLogo" [src]="lm.teamAwayLogo" [alt]="lm.teamAway" class="hint-flag" />
+    </span>
   </div>
 
   <div class="lb-list">
@@ -12,6 +16,17 @@
         {{ s.username }}
         <span class="you" *ngIf="currentUserId === s.id">(Du)</span>
       </span>
+
+      <!-- Abgegebener Tipp fürs Live-Spiel (mit Flaggen) -->
+      <span class="tip" *ngIf="liveMatch as lm">
+        <ng-container *ngIf="tipFor(s) as t">
+          <img *ngIf="lm.teamHomeLogo" [src]="lm.teamHomeLogo" [alt]="lm.teamHome" class="tip-flag" />
+          <span class="tip-score" [class]="pointsClass(t.points)">{{ t.predictedHome }}:{{ t.predictedAway }}</span>
+          <img *ngIf="lm.teamAwayLogo" [src]="lm.teamAwayLogo" [alt]="lm.teamAway" class="tip-flag" />
+        </ng-container>
+        <span class="no-tip" *ngIf="!tipFor(s)">kein Tipp</span>
+      </span>
+
       <span class="live-delta" *ngIf="s.livePoints > 0">+{{ s.livePoints }}</span>
       <span class="pts">{{ s.totalPoints }}</span>
     </div>

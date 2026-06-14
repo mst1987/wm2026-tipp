@@ -19,6 +19,13 @@ export interface Leaderboard {
   unpaid: Standing[];
 }
 
+export interface LiveTip {
+  matchId: string;
+  predictedHome: number;
+  predictedAway: number;
+  points: number;
+}
+
 export interface LiveStanding {
   rank: number;
   id: string;
@@ -29,6 +36,7 @@ export interface LiveStanding {
   basePoints: number;
   livePoints: number;
   totalPoints: number;
+  liveTips: LiveTip[];
 }
 
 export interface LiveLeaderboard {

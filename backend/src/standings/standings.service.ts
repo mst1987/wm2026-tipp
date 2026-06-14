@@ -60,13 +60,27 @@ export class StandingsService {
       let basePoints = 0;
       let livePoints = 0;
 
+      const liveTips: {
+        matchId: string;
+        predictedHome: number;
+        predictedAway: number;
+        points: number;
+      }[] = [];
+
       for (const tip of user.tips) {
         const m = tip.match;
         if (tip.pointsAwarded) {
           basePoints += tip.points;
         } else if (m.status === 'LIVE' && m.scoreHome !== null && m.scoreAway !== null) {
           liveMatchIds.add(m.id);
-          livePoints += this.provisionalPoints(tip.predictedHome, tip.predictedAway, m.scoreHome, m.scoreAway);
+          const pts = this.provisionalPoints(tip.predictedHome, tip.predictedAway, m.scoreHome, m.scoreAway);
+          livePoints += pts;
+          liveTips.push({
+            matchId: m.id,
+            predictedHome: tip.predictedHome,
+            predictedAway: tip.predictedAway,
+            points: pts,
+          });
         }
       }
 
@@ -79,6 +93,7 @@ export class StandingsService {
         basePoints,
         livePoints,
         totalPoints: basePoints + livePoints,
+        liveTips,
       };
     });
 
