@@ -1,0 +1,14 @@
+<div class="rules-page">
+  <div class="page-header">
+    <h2>Regeln & Pot</h2>
+    <p class="hint">Alles zum Einsatz, zur Gewinnverteilung und zur Wertung.</p>
+  </div>
+
+  <!-- Gesamtpot -->
+  <section class="pot-card" *ngIf="!loading()">
+    <app-pot-card [paidCount]="paidCount()" />
+  </section>
+
+  <!-- Spielregeln -->
+  <app-rules-card />
+</div>

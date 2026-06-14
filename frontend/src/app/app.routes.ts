@@ -47,6 +47,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'rules',
+        loadComponent: () =>
+          import('./pages/rules/rules.component').then((m) => m.RulesComponent),
+      },
+      {
         path: 'groups',
         loadComponent: () =>
           import('./pages/groups/groups.component').then(

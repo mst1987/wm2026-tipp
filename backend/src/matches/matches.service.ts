@@ -25,7 +25,7 @@ export class MatchesService {
     });
   }
 
-  findRecent(limit = 5) {
+  findRecent(limit = 10) {
     return this.prisma.match.findMany({
       where: { status: MatchStatus.FINISHED },
       orderBy: { matchDate: 'desc' },

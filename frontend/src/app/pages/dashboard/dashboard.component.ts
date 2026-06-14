@@ -7,8 +7,6 @@ import { Match, MatchesService, ScorerEntry } from '../../core/matches.service';
 import { Standing, StandingsService, LiveStanding } from '../../core/standings.service';
 import { Tip, TipsService } from '../../core/tips.service';
 import { MatchDetails, MatchDetailsService } from '../../core/match-details.service';
-import { PotCardComponent } from './components/pot-card/pot-card.component';
-import { RulesCardComponent } from './components/rules-card/rules-card.component';
 import { LiveMatchCardComponent } from './components/live-match-card/live-match-card.component';
 import { LiveLeaderboardComponent } from './components/live-leaderboard/live-leaderboard.component';
 import { TopScorersComponent } from './components/top-scorers/top-scorers.component';
@@ -22,8 +20,6 @@ import { RecentResultsComponent } from './components/recent-results/recent-resul
   imports: [
     CommonModule,
     RouterLink,
-    PotCardComponent,
-    RulesCardComponent,
     LiveMatchCardComponent,
     LiveLeaderboardComponent,
     TopScorersComponent,
@@ -40,7 +36,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   untippedCount = signal(0);
   loading = signal(true);
 
-  paidCount = signal(0);
   scorers = signal<ScorerEntry[]>([]);
   recent = signal<Match[]>([]);
   liveMatch = signal<Match | null>(null);
@@ -69,7 +64,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: ({ standings, matches, allMatches, tips, scorers, recent, live }) => {
         this.top5.set(standings.ranked.slice(0, 5));
-        this.paidCount.set(standings.ranked.length);
         this.upcoming.set(matches.filter((m) => m.status !== 'LIVE').slice(0, 5));
         this.untippedCount.set(this.countUntipped(allMatches, tips));
         this.scorers.set(scorers.slice(0, 10));
