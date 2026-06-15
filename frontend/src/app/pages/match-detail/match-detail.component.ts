@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -6,6 +6,7 @@ import {
   MatchDetails, MatchDetailsService, GoalEvent, CardEvent, SubEvent,
 } from '../../core/match-details.service';
 import { Match } from '../../core/matches.service';
+import { MatchTip, TipsService } from '../../core/tips.service';
 
 const GROUP_COLORS: Record<string, string> = {
   A: '#e74c3c', B: '#e67e22', C: '#f1c40f', D: '#2ecc71',
@@ -37,29 +38,68 @@ interface TimelineItem {
   templateUrl: './match-detail.component.html',
   styleUrl: './match-detail.component.scss',
 })
-export class MatchDetailComponent implements OnInit {
+export class MatchDetailComponent implements OnInit, OnDestroy {
   match = signal<Match | null>(null);
   details = signal<MatchDetails | null>(null);
+  matchTips = signal<MatchTip[]>([]);
+  tipsVisible = signal(false);
   loading = signal(true);
+
+  private matchId!: string;
+  private liveTimer?: ReturnType<typeof setInterval>;
 
   constructor(
     private route: ActivatedRoute,
     private service: MatchDetailsService,
+    private tipsService: TipsService,
   ) {}
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id')!;
+    this.matchId = this.route.snapshot.paramMap.get('id')!;
     forkJoin({
-      match: this.service.getMatch(id),
-      details: this.service.getDetails(id),
+      match: this.service.getMatch(this.matchId),
+      details: this.service.getDetails(this.matchId),
+      tips: this.tipsService.getMatchTips(this.matchId),
     }).subscribe({
-      next: ({ match, details }) => {
+      next: ({ match, details, tips }) => {
         this.match.set(match);
         this.details.set(details);
+        this.matchTips.set(tips.tips);
+        this.tipsVisible.set(tips.visible);
         this.loading.set(false);
+
+        // Bei laufendem Spiel alle 60 Sek aktualisieren (Stand + Tipp-Punkte)
+        if (match?.status === 'LIVE') {
+          this.liveTimer = setInterval(() => this.refreshLive(), 60_000);
+        }
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  ngOnDestroy() {
+    if (this.liveTimer) clearInterval(this.liveTimer);
+  }
+
+  private refreshLive() {
+    this.service.getMatch(this.matchId).subscribe({ next: (m) => this.match.set(m) });
+    this.service.getDetails(this.matchId).subscribe({ next: (d) => this.details.set(d) });
+    this.tipsService.getMatchTips(this.matchId).subscribe({
+      next: (t) => { this.matchTips.set(t.tips); this.tipsVisible.set(t.visible); },
+    });
+  }
+
+  avatarUrl(t: MatchTip): string {
+    if (t.avatar) return `https://cdn.discordapp.com/avatars/${t.discordId}/${t.avatar}.png`;
+    return `https://cdn.discordapp.com/embed/avatars/0.png`;
+  }
+
+  pointsClass(points: number | null): string {
+    if (points === 3) return 'exact';
+    if (points === 2) return 'diff';
+    if (points === 1) return 'tendency';
+    if (points === 0) return 'wrong';
+    return '';
   }
 
   /** Vereinte, chronologische Timeline aus Toren, Karten und Wechseln. */

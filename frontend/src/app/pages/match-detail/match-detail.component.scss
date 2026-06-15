@@ -305,3 +305,65 @@
     border-radius: 0.3rem;
   }
 }
+
+/* Tipps der Mitspieler */
+.tips-panel .panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .tips-live {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #3fb950;
+    animation: blink 1.2s infinite;
+  }
+}
+
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.7rem;
+  background: #0d1117;
+  border-left: 3px solid #30363d;
+  border-radius: 0.5rem;
+
+  &.exact    { border-left-color: #3fb950; }
+  &.diff     { border-left-color: #58a6ff; }
+  &.tendency { border-left-color: #f0c040; }
+  &.wrong    { border-left-color: #f85149; }
+
+  .tip-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .tip-name { flex: 1; font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .tip-pred {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+
+    .tip-flag { width: 20px; height: 15px; object-fit: contain; }
+    .tip-score { font-weight: 800; font-size: 0.95rem; color: #c9d1d9; }
+  }
+
+  .tip-pts {
+    min-width: 48px;
+    text-align: right;
+    font-weight: 800;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+    &.exact    { color: #3fb950; }
+    &.diff     { color: #58a6ff; }
+    &.tendency { color: #f0c040; }
+    &.wrong    { color: #8b949e; }
+  }
+}

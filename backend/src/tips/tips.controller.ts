@@ -16,6 +16,11 @@ export class TipsController {
     return this.tipsService.findByUserVisibleTo(userId, req.user?.id);
   }
 
+  @Get('match/:matchId')
+  getMatchTips(@Param('matchId') matchId: string) {
+    return this.tipsService.getMatchTips(matchId);
+  }
+
   @Get()
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))

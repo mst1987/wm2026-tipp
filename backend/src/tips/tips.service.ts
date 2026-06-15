@@ -84,6 +84,44 @@ export class TipsService {
   }
 
   /**
+   * Alle Tipps zu einem Spiel — aber erst sichtbar, wenn keine Tipps mehr
+   * änderbar sind (Spiel gestartet / Deadline vorbei). Punkte werden gegen
+   * den aktuellen Spielstand berechnet (provisorisch live, final bei FT).
+   */
+  async getMatchTips(matchId: string) {
+    const match = await this.prisma.match.findUnique({ where: { id: matchId } });
+    if (!match) throw new NotFoundException('Match not found');
+
+    const deadline = match.matchDate.getTime() - 10 * 60 * 1000;
+    const locked = match.status !== MatchStatus.SCHEDULED || Date.now() >= deadline;
+    if (!locked) return { visible: false, tips: [] };
+
+    const tips = await this.prisma.tip.findMany({
+      where: { matchId },
+      include: { user: { select: { id: true, username: true, avatar: true, discordId: true } } },
+    });
+
+    const hasScore = match.scoreHome !== null && match.scoreAway !== null;
+    const mapped = tips.map((t) => ({
+      userId: t.user.id,
+      username: t.user.username,
+      avatar: t.user.avatar,
+      discordId: t.user.discordId,
+      predictedHome: t.predictedHome,
+      predictedAway: t.predictedAway,
+      points: hasScore
+        ? this.computePoints(t.predictedHome, t.predictedAway, match.scoreHome!, match.scoreAway!)
+        : null,
+    }));
+
+    mapped.sort(
+      (a, b) => (b.points ?? -1) - (a.points ?? -1) || a.username.localeCompare(b.username),
+    );
+
+    return { visible: true, tips: mapped };
+  }
+
+  /**
    * Berechnet die Punkte ALLER Tipps auf beendete Spiele neu (auch bereits
    * gewertete) — z. B. nach einer Änderung der Wertungsregeln.
    */

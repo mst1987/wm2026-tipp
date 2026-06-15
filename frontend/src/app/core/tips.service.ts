@@ -14,6 +14,21 @@ export interface Tip {
   match: Match;
 }
 
+export interface MatchTip {
+  userId: string;
+  username: string;
+  avatar: string | null;
+  discordId: string;
+  predictedHome: number;
+  predictedAway: number;
+  points: number | null;
+}
+
+export interface MatchTips {
+  visible: boolean;
+  tips: MatchTip[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class TipsService {
   private base = `${environment.apiUrl}/tips`;
@@ -26,6 +41,10 @@ export class TipsService {
 
   getTipsByUser(userId: string) {
     return this.http.get<Tip[]>(`${this.base}/user/${userId}`);
+  }
+
+  getMatchTips(matchId: string) {
+    return this.http.get<MatchTips>(`${this.base}/match/${matchId}`);
   }
 
   submitTip(matchId: string, predictedHome: number, predictedAway: number) {
