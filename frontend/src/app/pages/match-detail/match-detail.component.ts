@@ -43,6 +43,7 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
   details = signal<MatchDetails | null>(null);
   matchTips = signal<MatchTip[]>([]);
   tipsVisible = signal(false);
+  activeTab = signal<'timeline' | 'tips'>('timeline');
   loading = signal(true);
 
   private matchId!: string;
@@ -66,6 +67,8 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
         this.details.set(details);
         this.matchTips.set(tips.tips);
         this.tipsVisible.set(tips.visible);
+        // Standard-Tab: Spielverlauf, sonst Tipps (wenn noch keine Ereignisse)
+        this.activeTab.set(this.hasEvents() ? 'timeline' : (tips.visible && tips.tips.length ? 'tips' : 'timeline'));
         this.loading.set(false);
 
         // Bei laufendem Spiel alle 60 Sek aktualisieren (Stand + Tipp-Punkte)

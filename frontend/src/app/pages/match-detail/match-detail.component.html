@@ -74,32 +74,22 @@
       </div>
     </div>
 
-    <!-- Tipps der Mitspieler (erst sichtbar, sobald gesperrt) -->
-    <section class="panel tips-panel" *ngIf="tipsVisible() && matchTips().length > 0">
-      <h3 class="panel-title">
-        Tipps der Mitspieler
-        <span class="tips-live" *ngIf="m.status === 'LIVE'">● LIVE</span>
-      </h3>
-      <div class="tips-list">
-        <div *ngFor="let t of matchTips()" class="tip-row" [class]="pointsClass(t.points)">
-          <img [src]="avatarUrl(t)" [alt]="t.username" class="tip-avatar" />
-          <span class="tip-name">{{ t.username }}</span>
-          <span class="tip-pred">
-            <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="tip-flag" />
-            <span class="tip-score">{{ t.predictedHome }}:{{ t.predictedAway }}</span>
-            <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="tip-flag" />
-          </span>
-          <span class="tip-pts" *ngIf="t.points !== null" [class]="pointsClass(t.points)">
-            {{ t.points }} Pkt
-          </span>
-        </div>
+    <!-- Spielverlauf / Tipps der Mitspieler (Tabs) -->
+    <section class="panel" *ngIf="hasEvents() || (tipsVisible() && matchTips().length > 0)">
+      <div class="detail-tabs">
+        <button class="tab" [class.active]="activeTab() === 'timeline'" (click)="activeTab.set('timeline')">
+          Spielverlauf
+        </button>
+        <button class="tab" *ngIf="tipsVisible() && matchTips().length > 0"
+                [class.active]="activeTab() === 'tips'" (click)="activeTab.set('tips')">
+          Tipps der Mitspieler ({{ matchTips().length }})
+          <span class="tab-live" *ngIf="m.status === 'LIVE'">●</span>
+        </button>
       </div>
-    </section>
 
-    <!-- Timeline: Tore, Karten, Wechsel -->
-    <section class="panel" *ngIf="hasEvents()">
-      <h3 class="panel-title">Spielverlauf</h3>
-      <div class="timeline">
+      <!-- Tab: Spielverlauf -->
+      <div class="timeline" *ngIf="activeTab() === 'timeline'">
+        <div class="tab-empty" *ngIf="!hasEvents()">Noch keine Ereignisse.</div>
         <div *ngFor="let ev of timeline()" class="tl-item" [class.away]="ev.team === 'away'">
           <div class="tl-minute">{{ minuteLabel(ev.minute, ev.extra) }}</div>
 
@@ -133,6 +123,22 @@
               </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Tab: Tipps der Mitspieler -->
+      <div class="tips-list" *ngIf="activeTab() === 'tips'">
+        <div *ngFor="let t of matchTips()" class="tip-row" [class]="pointsClass(t.points)">
+          <img [src]="avatarUrl(t)" [alt]="t.username" class="tip-avatar" />
+          <span class="tip-name">{{ t.username }}</span>
+          <span class="tip-pred">
+            <img *ngIf="m.teamHomeLogo" [src]="m.teamHomeLogo" [alt]="m.teamHome" class="tip-flag" />
+            <span class="tip-score">{{ t.predictedHome }}:{{ t.predictedAway }}</span>
+            <img *ngIf="m.teamAwayLogo" [src]="m.teamAwayLogo" [alt]="m.teamAway" class="tip-flag" />
+          </span>
+          <span class="tip-pts" *ngIf="t.points !== null" [class]="pointsClass(t.points)">
+            {{ t.points }} Pkt
+          </span>
         </div>
       </div>
     </section>
