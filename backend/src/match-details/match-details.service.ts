@@ -514,17 +514,17 @@ export class MatchDetailsService {
       },
     };
 
-    // Effektives Ergebnis inkl. Verlängerung & Elfmeterschießen:
-    // API-Football 'goals' = Stand nach Verlängerung (bei Elfmeterschießen ein
-    // Unentschieden). Der Elfmeter-Sieger bekommt +1 Tor → z. B. 4:4 n.V.,
-    // Elfmetersieg auswärts ⇒ Endstand 4:5.
+    // Effektives Ergebnis = Stand nach regulärer Spielzeit/Verlängerung plus die
+    // Tore aus dem Elfmeterschießen. API-Football 'goals' = Stand vor dem
+    // Elfmeterschießen (das Unentschieden), 'score.penalty' = Elfmeter-Tore.
+    // Beispiel: 1:1, i.E. 4:3 ⇒ 5:4.
     let scoreHome = f.goals?.home ?? null;
     let scoreAway = f.goals?.away ?? null;
     const penHome = f.score?.penalty?.home ?? null;
     const penAway = f.score?.penalty?.away ?? null;
     if (penHome !== null && penAway !== null && scoreHome !== null && scoreAway !== null) {
-      if (penHome > penAway) scoreHome += 1;
-      else if (penAway > penHome) scoreAway += 1;
+      scoreHome += penHome;
+      scoreAway += penAway;
     }
 
     return {
