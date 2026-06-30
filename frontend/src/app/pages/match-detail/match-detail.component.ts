@@ -153,14 +153,14 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Anzeige-Ergebnis: bevorzugt API-Details, sonst DB. */
+  /** Anzeige-Ergebnis: der gespeicherte (effektive) Endstand inkl. n.V./i.E. */
   displayScore(): { home: number | null; away: number | null } {
-    const d = this.details();
     const m = this.match();
-    if (d?.available && d.score?.fulltime?.home !== null && d.score?.fulltime?.home !== undefined) {
-      return d.score.fulltime;
+    if (m && m.scoreHome !== null && m.scoreAway !== null) {
+      return { home: m.scoreHome, away: m.scoreAway };
     }
-    return { home: m?.scoreHome ?? null, away: m?.scoreAway ?? null };
+    const d = this.details();
+    return d?.score?.fulltime ?? { home: null, away: null };
   }
 
   hasScore(): boolean {
