@@ -284,24 +284,22 @@ export class MatchDetailsService {
 
   private async findRelevantMatches(): Promise<Match[]> {
     const now = new Date();
-    // Zeitfenster entkoppelt vom (ggf. verzögerten) football-data.org-Status:
-    // ab 90 Min vor Anpfiff (Aufstellungen) bis 3,5 Std danach (Live + Endstand)
-    const windowStart = new Date(now.getTime() - 3.5 * 60 * 60 * 1000);
-    const windowEnd = new Date(now.getTime() + 90 * 60 * 1000);
+    const windowEnd = new Date(now.getTime() + 90 * 60 * 1000); // 90 Min vor Anpfiff (Aufstellungen)
+    const notBefore = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // letzte 3 Tage
 
     return this.prisma.match.findMany({
       where: {
-        OR: [
-          // laufende Spiele (laut DB)
-          { status: MatchStatus.LIVE },
-          // Spiele im Live-Zeitfenster — unabhängig vom DB-Status
-          {
-            matchDate: { gte: windowStart, lte: windowEnd },
-            status: { notIn: [MatchStatus.POSTPONED, MatchStatus.CANCELLED] },
-          },
-          // Sicherheitsnetz: beendete Spiele ganz ohne Details
-          { status: MatchStatus.FINISHED, detailsSyncedAt: null },
-        ],
+        // Jedes bereits angepfiffene (oder gleich startende) Spiel, das noch
+        // KEINEN finalen Endstand hat — entkoppelt vom (verzögerten)
+        // football-data.org-Status. So bleiben auch "Nachzügler" nicht hängen,
+        // die football-data.org noch nicht auf FINISHED gesetzt hat.
+        matchDate: { gte: notBefore, lte: windowEnd },
+        status: { notIn: [MatchStatus.POSTPONED, MatchStatus.CANCELLED] },
+        NOT: {
+          status: MatchStatus.FINISHED,
+          scoreHome: { not: null },
+          detailsSyncedAt: { not: null },
+        },
       },
       orderBy: { matchDate: 'asc' },
     });
