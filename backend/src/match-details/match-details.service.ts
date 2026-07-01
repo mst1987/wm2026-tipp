@@ -317,9 +317,9 @@ export class MatchDetailsService {
         // Jedes bereits angepfiffene (oder gleich startende) Spiel, das noch
         // KEINEN finalen Endstand hat — entkoppelt vom (verzögerten)
         // football-data.org-Status. So bleiben auch "Nachzügler" nicht hängen,
-        // die football-data.org noch nicht auf FINISHED gesetzt hat.
+        // die football-data.org noch nicht auf FINISHED gesetzt hat, und
+        // fälschlich als "verschoben" gemeldete Spiele werden korrigiert.
         matchDate: { gte: notBefore, lte: windowEnd },
-        status: { notIn: [MatchStatus.POSTPONED, MatchStatus.CANCELLED] },
         NOT: {
           status: MatchStatus.FINISHED,
           scoreHome: { not: null },
