@@ -66,7 +66,20 @@
       </div>
 
       <p class="api-hint">
-        Berechnet die Punkte aller beendeten Spiele neu (z. B. nach einer Regeländerung).
+        Berechnet die Punkte aller beendeten Spiele neu (aus dem gespeicherten Endstand).
+      </p>
+
+      <div class="api-actions recalc-row">
+        <button class="btn-recalc" (click)="resyncResults()" [disabled]="resyncing() || !s.configured">
+          <ng-container *ngIf="resyncing()">⏳ Ziehe...</ng-container>
+          <ng-container *ngIf="!resyncing()">📥 Ergebnisse neu ziehen</ng-container>
+        </button>
+        <span class="sync-msg" *ngIf="resyncMessage()">{{ resyncMessage() }}</span>
+      </div>
+
+      <p class="api-hint">
+        Holt alle beendeten Spiele frisch von API-Football (korrigiert z. B. Endstände nach
+        Elfmeterschießen) und berechnet danach die Punkte neu.
       </p>
     </div>
 

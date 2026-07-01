@@ -99,6 +99,28 @@ export class AdminComponent implements OnInit, OnDestroy {
     });
   }
 
+  resyncing = signal(false);
+  resyncMessage = signal<string | null>(null);
+
+  resyncResults() {
+    if (this.resyncing()) return;
+    this.resyncing.set(true);
+    this.resyncMessage.set(null);
+    this.adminService.resyncResults().subscribe({
+      next: (res) => {
+        this.resyncMessage.set(
+          `✓ ${res.updated} Spiel${res.updated === 1 ? '' : 'e'} neu gezogen, ${res.updatedTips} Tipps neu berechnet.`,
+        );
+        this.resyncing.set(false);
+        this.loadApiStatus();
+      },
+      error: () => {
+        this.resyncMessage.set('Fehler beim Neu-Ziehen.');
+        this.resyncing.set(false);
+      },
+    });
+  }
+
   /** "vor X Minuten/Sekunden/Stunden" – reaktiv über now(). */
   timeAgo(iso: string | null): string {
     if (!iso) return 'nie';

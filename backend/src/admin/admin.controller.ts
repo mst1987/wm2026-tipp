@@ -48,4 +48,11 @@ export class AdminController {
   recalculatePoints() {
     return this.tipsService.recalculateAllPoints();
   }
+
+  @Post('resync-results')
+  async resyncResults() {
+    const resync = await this.matchDetailsService.resyncFinishedResults();
+    const recalc = await this.tipsService.recalculateAllPoints();
+    return { ...resync, ...recalc };
+  }
 }

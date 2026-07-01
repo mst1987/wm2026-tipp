@@ -235,6 +235,31 @@ export class MatchDetailsService {
     return { ...result, status };
   }
 
+  /**
+   * Zieht ALLE beendeten Spiele erneut frisch von API-Football (erzwungen) —
+   * z. B. um Endstände nach einer Regeländerung (Elfmeterschießen) zu
+   * korrigieren. Anschließend werden die Punkte neu berechnet.
+   */
+  async resyncFinishedResults(): Promise<{ updated: number; skipped: string | null }> {
+    if (!this.isConfigured()) return { updated: 0, skipped: 'API-Football ist nicht konfiguriert.' };
+    if (this.syncing) return { updated: 0, skipped: 'Ein Sync läuft bereits.' };
+
+    this.syncing = true;
+    try {
+      const matches = await this.prisma.match.findMany({ where: { status: MatchStatus.FINISHED } });
+      let updated = 0;
+      for (const match of matches) {
+        if ((await this.countCallsToday()) >= DAILY_LIMIT - SAFETY_MARGIN) break;
+        const ok = await this.fetchAndStoreDetails(match, true);
+        if (ok) updated++;
+      }
+      this.logger.log(`Ergebnisse neu gezogen: ${updated} beendete Spiele aktualisiert.`);
+      return { updated, skipped: null };
+    } finally {
+      this.syncing = false;
+    }
+  }
+
   // ─── Cron: jede Minute relevante Spiele synchronisieren ───
 
   @Cron('0 * * * * *') // jede Minute (nahezu Echtzeit während Live-Spielen)
@@ -306,11 +331,13 @@ export class MatchDetailsService {
   }
 
   /** Holt Details für ein Spiel von der API, speichert sie und aktualisiert Status/Score. */
-  private async fetchAndStoreDetails(match: Match): Promise<boolean> {
+  private async fetchAndStoreDetails(match: Match, force = false): Promise<boolean> {
     try {
       // Bereits final geladenes Spiel mit gültigem Endstand nicht erneut abrufen
+      // (außer bei force = erzwungenem Neu-Ziehen, z. B. nach Regeländerung)
       const stored = match.detailsJson as unknown as MatchDetails | null;
       if (
+        !force &&
         match.status === MatchStatus.FINISHED &&
         match.scoreHome !== null &&
         stored?.status &&

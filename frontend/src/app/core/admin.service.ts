@@ -60,4 +60,11 @@ export class AdminService {
       {},
     );
   }
+
+  resyncResults() {
+    return this.http.post<{ updated: number; skipped: string | null; matches: number; updatedTips: number }>(
+      `${this.base}/resync-results`,
+      {},
+    );
+  }
 }
